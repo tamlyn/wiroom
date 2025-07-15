@@ -95,26 +95,32 @@ const PensionCalculator = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Pension Calculator with Uncertainty Modeling</h1>
+    <div className="max-w-7xl mx-auto p-4 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">Pension Calculator</h1>
 
-      <div className="mb-8">
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-        
-        <div className="bg-gray-50 p-6 rounded-lg transition-all duration-200">
-          {renderTabContent()}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        {/* Left Column - Controls */}
+        <div className="space-y-4">
+          <div>
+            <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+            <div className="bg-gray-50 p-4 rounded-lg">
+              {renderTabContent()}
+            </div>
+          </div>
+
+          <ProjectedOutcomes
+            params={pensionParams}
+            percentileData={percentileData}
+            survivalRates={survivalRates}
+          />
+        </div>
+
+        {/* Right Column - Chart */}
+        <div className="space-y-4">
+          <PensionChart percentileData={percentileData} />
+          <ImportantNotes />
         </div>
       </div>
-
-      <ProjectedOutcomes
-        params={pensionParams}
-        percentileData={percentileData}
-        survivalRates={survivalRates}
-      />
-
-      <PensionChart percentileData={percentileData} />
-
-      <ImportantNotes />
     </div>
   );
 };

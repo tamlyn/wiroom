@@ -1,4 +1,5 @@
 import { InputSlider } from './InputSlider';
+import { InfoButton } from './InfoButton';
 import { formatCurrency } from '../utils';
 
 interface CurrentSituationTabProps {
@@ -15,9 +16,11 @@ export const CurrentSituationTab = ({
   onCurrentPotChange
 }: CurrentSituationTabProps) => {
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Current Situation</h3>
-      <p className="text-sm text-gray-600 mb-4">These are the facts about where you are today.</p>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h3 className="text-base font-semibold text-gray-800">Your Current Situation</h3>
+        <InfoButton content="These are the facts about where you are today. Your current age and existing pension pot value." />
+      </div>
 
       <InputSlider
         label="Current Age"

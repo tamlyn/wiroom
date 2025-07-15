@@ -16,56 +16,38 @@ export const ProjectedOutcomes = ({
   const withdrawalRate = retirementStats.p50 ? (params.annualDrawdown / retirementStats.p50) * 100 : 0;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md mb-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Projected Outcomes (Based on 1,000 Simulations)</h2>
+    <div className="bg-gray-50 p-3 rounded-md">
+      <h2 className="text-base font-semibold text-gray-800 mb-2">Projected Outcomes</h2>
 
-      {/* Quick Summary of All Parameters */}
-      <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
-        <div className="bg-white p-2 rounded border border-gray-200">
-          <p className="font-medium text-gray-700">Current Situation</p>
-          <p className="text-gray-600">Age {params.currentAge} → {params.retirementAge}</p>
-          <p className="text-gray-600">Pot: {formatCurrency(params.currentPot)}</p>
-        </div>
-        <div className="bg-white p-2 rounded border border-gray-200">
-          <p className="font-medium text-gray-700">Market Assumptions</p>
-          <p className="text-gray-600">Return: {params.growthRate}%</p>
-          <p className="text-gray-600">Volatility: {params.volatility}%</p>
-        </div>
-        <div className="bg-white p-2 rounded border border-gray-200">
-          <p className="font-medium text-gray-700">Your Decisions</p>
-          <p className="text-gray-600">Save: {formatCurrency(params.annualContribution)}/yr</p>
-          <p className="text-gray-600">Draw: {formatCurrency(params.annualDrawdown)}/yr</p>
-          {withdrawalRate > 0 && (
-            <p className={`text-xs ${
-              withdrawalRate <= 4 ? 'text-green-600' : 
-              withdrawalRate <= 6 ? 'text-amber-600' : 
-              'text-red-600'
-            }`}>
-              ({withdrawalRate.toFixed(1)}% withdrawal rate)
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-2 gap-2 text-xs mb-3">
         <div>
-          <span className="text-gray-600">Pot Value at Retirement ({params.retirementAge}):</span>
-          <div className="mt-1">
-            <p className="text-xs text-gray-500">5th percentile: <span className="font-semibold text-red-600">{formatCurrency(retirementStats.p5 || 0)}</span></p>
-            <p className="text-xs text-gray-500">Median: <span className="font-semibold text-blue-600">{formatCurrency(retirementStats.p50 || 0)}</span></p>
-            <p className="text-xs text-gray-500">95th percentile: <span className="font-semibold text-green-600">{formatCurrency(retirementStats.p95 || 0)}</span></p>
+          <p className="font-medium text-gray-700 mb-1">At Retirement ({params.retirementAge}):</p>
+          <div className="space-y-0.5">
+            <p>Median: <span className="font-semibold text-blue-600">{formatCurrency(retirementStats.p50 || 0)}</span></p>
+            <p>Range: <span className="text-red-600">{formatCurrency(retirementStats.p5 || 0)}</span> - <span className="text-green-600">{formatCurrency(retirementStats.p95 || 0)}</span></p>
+            {withdrawalRate > 0 && (
+              <p className={withdrawalRate <= 4 ? 'text-green-600' : withdrawalRate <= 6 ? 'text-amber-600' : 'text-red-600'}>
+                {withdrawalRate.toFixed(1)}% withdrawal rate
+              </p>
+            )}
           </div>
         </div>
         <div>
-          <span className="text-gray-600">Probability of Pot Lasting Until:</span>
-          <div className="mt-1">
+          <p className="font-medium text-gray-700 mb-1">Survival Probability:</p>
+          <div className="space-y-0.5">
             {survivalRates.map(({ age, rate }) => (
-              <p key={age} className="text-xs text-gray-500">
-                Age {age}: <span className="font-semibold">{rate}%</span>
-              </p>
+              <p key={age}>Age {age}: <span className="font-semibold">{rate}%</span></p>
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="text-xs text-gray-500 flex items-center gap-1">
+        <span>Based on 1,000 Monte Carlo simulations</span>
+        <span>•</span>
+        <span>Age {params.currentAge} → {params.retirementAge}</span>
+        <span>•</span>
+        <span>{params.growthRate}% return, {params.volatility}% volatility</span>
       </div>
     </div>
   );

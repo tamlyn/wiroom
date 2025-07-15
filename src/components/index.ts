@@ -6,3 +6,5 @@ export { YourDecisionsTab } from './YourDecisionsTab';
 export { ProjectedOutcomes } from './ProjectedOutcomes';
 export { PensionChart } from './PensionChart';
 export { ImportantNotes } from './ImportantNotes';
+export { CollapsibleSection } from './CollapsibleSection';
+export { InfoButton } from './InfoButton';

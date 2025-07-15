@@ -1,4 +1,6 @@
 import { InputSlider } from './InputSlider';
+import { InfoButton } from './InfoButton';
+import { CollapsibleSection } from './CollapsibleSection';
 import { formatCurrency } from '../utils';
 
 interface YourDecisionsTabProps {
@@ -21,9 +23,11 @@ export const YourDecisionsTab = ({
   onAnnualDrawdownChange
 }: YourDecisionsTabProps) => {
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Decisions</h3>
-      <p className="text-sm text-gray-600 mb-4">These are the factors you can control to improve your retirement outcomes.</p>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h3 className="text-base font-semibold text-gray-800">Your Decisions</h3>
+        <InfoButton content="These are the factors you can control to improve your retirement outcomes. Small changes can have big impacts over time." />
+      </div>
 
       <InputSlider
         label="Annual Contribution"
@@ -57,15 +61,14 @@ export const YourDecisionsTab = ({
         description={`($${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
       />
 
-      <div className="bg-green-50 p-3 rounded-md text-sm">
-        <p className="font-semibold text-green-900">Optimization Tips:</p>
-        <p className="text-green-800 mt-1">
-          • Increasing contributions by even $100/month can significantly impact your retirement<br/>
-          • Delaying retirement by 1-2 years can dramatically improve outcomes<br/>
-          • Consider the 4% rule: annual drawdown of 4% of initial pot often lasts 30+ years<br/>
-          • Withdrawal rate colors: <span className="text-green-600">green ≤4%</span>, <span className="text-amber-600">amber 4-6%</span>, <span className="text-red-600">red &gt;6%</span>
-        </p>
-      </div>
+      <CollapsibleSection title="Optimization Tips">
+        <div className="text-xs text-gray-700 space-y-1">
+          <p>• Increasing contributions by even $100/month can significantly impact your retirement</p>
+          <p>• Delaying retirement by 1-2 years can dramatically improve outcomes</p>
+          <p>• Consider the 4% rule: annual drawdown of 4% of initial pot often lasts 30+ years</p>
+          <p>• Withdrawal rate colors: <span className="text-green-600">green ≤4%</span>, <span className="text-amber-600">amber 4-6%</span>, <span className="text-red-600">red &gt;6%</span></p>
+        </div>
+      </CollapsibleSection>
     </div>
   );
 };
