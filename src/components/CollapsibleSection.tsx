@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -7,11 +7,11 @@ interface CollapsibleSectionProps {
   className?: string;
 }
 
-export const CollapsibleSection = ({ 
-  title, 
-  children, 
+export const CollapsibleSection = ({
+  title,
+  children,
   defaultExpanded = false,
-  className = ""
+  className = "",
 }: CollapsibleSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
@@ -22,20 +22,21 @@ export const CollapsibleSection = ({
         className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
       >
         <svg
-          className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+          className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-90" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
         {title}
       </button>
-      {isExpanded && (
-        <div className="mt-2 ml-6">
-          {children}
-        </div>
-      )}
+      {isExpanded && <div className="mt-2 ml-6">{children}</div>}
     </div>
   );
 };

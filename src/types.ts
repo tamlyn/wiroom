@@ -23,4 +23,4 @@ export interface PercentileDataPoint {
   [key: string]: number | undefined;
 }
 
-export type TabType = 'current' | 'uncertainty' | 'decisions';
+export type TabType = "current" | "uncertainty" | "decisions";

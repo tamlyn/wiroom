@@ -1,7 +1,7 @@
 export interface PensionDataPoint {
   age: number;
   potValue: number;
-  phase: 'Accumulation' | 'Drawdown';
+  phase: "Accumulation" | "Drawdown";
 }
 
 export const calculatePensionProjection = (
@@ -11,7 +11,7 @@ export const calculatePensionProjection = (
   growthRate: number,
   retirementAge: number,
   annualDrawdown: number,
-  maxAge = 100
+  maxAge = 100,
 ): PensionDataPoint[] => {
   const data: PensionDataPoint[] = [];
   let pot = currentPot;
@@ -36,7 +36,7 @@ export const calculatePensionProjection = (
     data.push({
       age: age,
       potValue: Math.round(pot),
-      phase: age < retirementAge ? 'Accumulation' : 'Drawdown'
+      phase: age < retirementAge ? "Accumulation" : "Drawdown",
     });
 
     // Stop projecting if pot is depleted in drawdown phase

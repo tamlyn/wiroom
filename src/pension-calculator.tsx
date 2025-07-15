@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { runMonteCarloSimulation, calculatePercentiles } from './monte-carlo';
-import { calculateSurvivalRates } from './utils';
-import { TabType, PensionParams } from './types';
+import { useState, useMemo } from "react";
+import { runMonteCarloSimulation, calculatePercentiles } from "./monte-carlo";
+import { calculateSurvivalRates } from "./utils";
+import { TabType, PensionParams } from "./types";
 import {
   TabNavigation,
   CurrentSituationTab,
@@ -9,8 +9,8 @@ import {
   YourDecisionsTab,
   ProjectedOutcomes,
   PensionChart,
-  ImportantNotes
-} from './components';
+  ImportantNotes,
+} from "./components";
 
 const PensionCalculator = () => {
   const [currentAge, setCurrentAge] = useState(30);
@@ -20,7 +20,7 @@ const PensionCalculator = () => {
   const [volatility, setVolatility] = useState(15);
   const [retirementAge, setRetirementAge] = useState(65);
   const [annualDrawdown, setAnnualDrawdown] = useState(30000);
-  const [activeTab, setActiveTab] = useState<TabType>('decisions');
+  const [activeTab, setActiveTab] = useState<TabType>("decisions");
 
   const pensionParams: PensionParams = {
     currentAge,
@@ -29,7 +29,7 @@ const PensionCalculator = () => {
     growthRate,
     volatility,
     retirementAge,
-    annualDrawdown
+    annualDrawdown,
   };
 
   const { percentileData, simulations } = useMemo(() => {
@@ -42,16 +42,24 @@ const PensionCalculator = () => {
       retirementAge,
       annualDrawdown,
       100,
-      1000
+      1000,
     );
 
     const percentiles = calculatePercentiles(sims, [5, 25, 50, 75, 95]);
 
     return {
       percentileData: percentiles,
-      simulations: sims
+      simulations: sims,
     };
-  }, [currentAge, currentPot, annualContribution, growthRate, volatility, retirementAge, annualDrawdown]);
+  }, [
+    currentAge,
+    currentPot,
+    annualContribution,
+    growthRate,
+    volatility,
+    retirementAge,
+    annualDrawdown,
+  ]);
 
   const survivalRates = useMemo(() => {
     return calculateSurvivalRates(simulations);
@@ -59,7 +67,7 @@ const PensionCalculator = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'current':
+      case "current":
         return (
           <CurrentSituationTab
             currentAge={currentAge}
@@ -68,7 +76,7 @@ const PensionCalculator = () => {
             onCurrentPotChange={setCurrentPot}
           />
         );
-      case 'uncertainty':
+      case "uncertainty":
         return (
           <MarketAssumptionsTab
             growthRate={growthRate}
@@ -77,7 +85,7 @@ const PensionCalculator = () => {
             onVolatilityChange={setVolatility}
           />
         );
-      case 'decisions':
+      case "decisions":
         return (
           <YourDecisionsTab
             currentAge={currentAge}
@@ -96,7 +104,9 @@ const PensionCalculator = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Pension Calculator</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">
+        Pension Calculator
+      </h1>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Left Column - Controls */}

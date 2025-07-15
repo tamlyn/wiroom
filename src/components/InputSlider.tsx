@@ -19,13 +19,16 @@ export const InputSlider = ({
   step = 1,
   formatter = (v) => v.toString(),
   description,
-  className = ""
+  className = "",
 }: InputSliderProps) => {
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}: <span className="font-bold text-blue-600">{formatter(value)}</span>
-        {description && <span className="text-xs text-gray-500 ml-2">{description}</span>}
+        {label}:{" "}
+        <span className="font-bold text-blue-600">{formatter(value)}</span>
+        {description && (
+          <span className="text-xs text-gray-500 ml-2">{description}</span>
+        )}
       </label>
       <input
         type="range"
