@@ -37,7 +37,7 @@ export const runMonteCarloSimulation = (
         // Generate random return based on normal distribution
         const randomReturn = generateNormalReturn(expectedReturn, volatility);
 
-        if (age <= retirementAge) {
+        if (age < retirementAge) {
           pot = pot * (1 + randomReturn) + annualContribution;
         } else {
           pot = pot * (1 + randomReturn) - annualDrawdown;
@@ -51,7 +51,7 @@ export const runMonteCarloSimulation = (
         potValue: Math.round(pot),
       });
 
-      if (pot === 0) break;
+      // Continue simulation even if pot is 0 to avoid survival bias
     }
 
     simulations.push(path);
@@ -75,12 +75,8 @@ export const calculatePercentiles = (
 
   for (let age = minAge; age <= maxAge; age++) {
     const valuesAtAge = simulations
-      .map((sim) => sim.find((point) => point.age === age))
-      .filter((point) => point !== undefined)
-      .map((point) => point!.potValue)
+      .map((sim) => sim.find((point) => point.age === age)?.potValue || 0)
       .sort((a, b) => a - b);
-
-    if (valuesAtAge.length === 0) continue;
 
     const percentileValues: Record<string, number> = { age };
     percentiles.forEach((p) => {
