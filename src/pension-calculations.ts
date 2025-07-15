@@ -39,8 +39,8 @@ export const calculatePensionProjection = (
       phase: age < retirementAge ? 'Accumulation' : 'Drawdown'
     });
 
-    // Stop projecting if pot is depleted
-    if (pot === 0) break;
+    // Stop projecting if pot is depleted in drawdown phase
+    if (pot === 0 && age >= retirementAge) break;
   }
 
   return data;
