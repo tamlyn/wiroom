@@ -12,6 +12,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       expect(result[0]).toEqual({
@@ -31,6 +32,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Year 1: 50000 * 1.05 + 10000 = 62500
@@ -58,6 +60,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Age 63: Accumulation
@@ -95,6 +98,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 40000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Already at retirement age - immediately in drawdown phase
@@ -124,6 +128,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // No growth, just contributions
@@ -141,6 +146,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Year 1: 100000 * 0.98 + 5000 = 103000
@@ -159,6 +165,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Just growth, no contributions
@@ -176,6 +183,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 0,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // At retirement, pot should continue growing
@@ -196,6 +204,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 60000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Starting at retirement with 50k, drawing 60k/year
@@ -220,6 +229,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 150,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 100,
       });
 
@@ -241,6 +251,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 80,
       });
 
@@ -259,6 +270,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 80,
       });
 
@@ -278,6 +290,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // All pot values should be integers
@@ -296,6 +309,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 20000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Year 1: 10000 * 1.0375 + 1000 = 11375
@@ -312,6 +326,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 1,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // 1 * 1.05 - 1 = 0.05 -> rounds to 0
@@ -329,6 +344,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 500000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // 10M * 1.05 - 500k = 10M
@@ -348,6 +364,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 40000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const retirementEntry = result.find((entry) => entry.age === 65);
@@ -365,6 +382,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 50000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const retirementEntry = result.find((entry) => entry.age === 65);
@@ -382,6 +400,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 35000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const retirementEntry = result.find((entry) => entry.age === 65);
@@ -399,6 +418,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const retirementEntry = result.find((entry) => entry.age === 65);
@@ -416,6 +436,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const retirementEntry = result.find((entry) => entry.age === 65);
@@ -437,6 +458,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: annualDrawdown,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 95,
       });
 
@@ -457,6 +479,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 80000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Should deplete within reasonable time
@@ -477,6 +500,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 67,
         annualDrawdown: 10000,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 100,
       });
 
@@ -495,6 +519,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 25000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       expect(result[0].potValue).toBe(0);
@@ -515,6 +540,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
         maxAge: 75,
       });
 
@@ -534,6 +560,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 50000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
       const retirementEntry = highGrowthResult.find(
         (entry) => entry.age === 65,
@@ -550,6 +577,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 50000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
       const retirementEntryLow = lowGrowthResult.find(
         (entry) => entry.age === 65,
@@ -569,6 +597,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       for (let i = 1; i < result.length; i++) {
@@ -586,6 +615,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       let foundTransition = false;
@@ -618,6 +648,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 50000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       result.forEach((entry) => {
@@ -635,6 +666,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       // Should have exactly one entry where pot goes to 0
@@ -652,6 +684,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       for (let i = 1; i < result.length; i++) {
@@ -692,6 +725,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 12000,
+        deathAge: 80,
       });
 
       // Find entries for ages 67, 68, 69
@@ -721,6 +755,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 60,
         annualDrawdown: 40000,
         statePensionAmount: 12000,
+        deathAge: 80,
       });
 
       const age60 = result.find((entry) => entry.age === 60);
@@ -743,6 +778,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 30000,
         statePensionAmount: 0,
+        deathAge: 80,
       });
 
       const age65 = result.find((entry) => entry.age === 65);
@@ -766,6 +802,7 @@ describe("calculatePensionProjection", () => {
         retirementAge: 65,
         annualDrawdown: 35000,
         statePensionAmount: 11973,
+        deathAge: 80,
       });
 
       const age66 = result.find((entry) => entry.age === 66);

@@ -1,23 +1,28 @@
 import { InputSlider } from "./InputSlider";
 import { InfoButton } from "./InfoButton";
 import { formatCurrency } from "../utils";
+import { calculateStatePensionAmount } from "../state-pension";
 
 interface CurrentSituationTabProps {
   currentAge: number;
   currentPot: number;
   sex: "male" | "female";
+  statePensionContributingYears: number;
   onCurrentAgeChange: (value: number) => void;
   onCurrentPotChange: (value: number) => void;
   onSexChange: (value: "male" | "female") => void;
+  onStatePensionContributingYearsChange: (value: number) => void;
 }
 
 export const CurrentSituationTab = ({
   currentAge,
   currentPot,
   sex,
+  statePensionContributingYears,
   onCurrentAgeChange,
   onCurrentPotChange,
   onSexChange,
+  onStatePensionContributingYearsChange,
 }: CurrentSituationTabProps) => {
   return (
     <div className="space-y-4">
@@ -77,6 +82,19 @@ export const CurrentSituationTab = ({
           </label>
         </div>
       </div>
+
+      <InputSlider
+        label="State Pension Contributing Years"
+        value={statePensionContributingYears}
+        onChange={onStatePensionContributingYearsChange}
+        min={0}
+        max={35}
+        formatter={(value) => {
+          const amount = calculateStatePensionAmount(value);
+          return `${value} years (${formatCurrency(amount)}/year)`;
+        }}
+        description="Need 10+ years for any pension, 35 years for full amount"
+      />
     </div>
   );
 };

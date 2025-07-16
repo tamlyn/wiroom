@@ -1,5 +1,21 @@
 export const CURRENT_FULL_STATE_PENSION_ANNUAL = 11973; // 2025-26 rate
 
+export const calculateStatePensionAmount = (
+  contributingYears: number,
+): number => {
+  if (contributingYears < 10) {
+    return 0;
+  }
+
+  if (contributingYears >= 35) {
+    return CURRENT_FULL_STATE_PENSION_ANNUAL;
+  }
+
+  return Math.round(
+    (CURRENT_FULL_STATE_PENSION_ANNUAL / 35) * contributingYears,
+  );
+};
+
 export const calculateStatePensionAge = (birthYear: number): number => {
   // Current rules based on birth year
   if (birthYear <= 1953) {

@@ -2,21 +2,16 @@ import { InputSlider } from "./InputSlider";
 import { InfoButton } from "./InfoButton";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { formatCurrency } from "../utils";
-import {
-  getStatePensionEligibilityAge,
-  CURRENT_FULL_STATE_PENSION_ANNUAL,
-} from "../state-pension";
+import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "../state-pension";
 
 interface YourDecisionsTabProps {
   currentAge: number;
   annualContribution: number;
   retirementAge: number;
   annualDrawdown: number;
-  statePensionAmount: number;
   onAnnualContributionChange: (value: number) => void;
   onRetirementAgeChange: (value: number) => void;
   onAnnualDrawdownChange: (value: number) => void;
-  onStatePensionAmountChange: (value: number) => void;
 }
 
 export const YourDecisionsTab = ({
@@ -24,14 +19,10 @@ export const YourDecisionsTab = ({
   annualContribution,
   retirementAge,
   annualDrawdown,
-  statePensionAmount,
   onAnnualContributionChange,
   onRetirementAgeChange,
   onAnnualDrawdownChange,
-  onStatePensionAmountChange,
 }: YourDecisionsTabProps) => {
-  const statePensionAge = getStatePensionEligibilityAge(currentAge);
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -71,17 +62,6 @@ export const YourDecisionsTab = ({
         step={1000}
         formatter={(value) => formatCurrency(value)}
         description={`($${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
-      />
-
-      <InputSlider
-        label="Expected State Pension"
-        value={statePensionAmount}
-        onChange={onStatePensionAmountChange}
-        min={0}
-        max={20000}
-        step={100}
-        formatter={(value) => formatCurrency(value)}
-        description={`Available from age ${statePensionAge} (${formatCurrency(Math.round(statePensionAmount / 12))}/month)`}
       />
 
       <CollapsibleSection title="Optimization Tips">

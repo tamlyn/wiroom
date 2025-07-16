@@ -1,20 +1,3 @@
-export interface PensionParams {
-  currentAge: number;
-  currentPot: number;
-  annualContribution: number;
-  growthRate: number;
-  volatility: number;
-  retirementAge: number;
-  annualDrawdown: number;
-  sex: "male" | "female";
-  statePensionAmount: number;
-}
-
-export interface SurvivalRate {
-  age: number;
-  rate: number;
-}
-
 export interface PercentileDataPoint {
   age: number;
   p5?: number;

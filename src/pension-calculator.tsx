@@ -3,8 +3,8 @@ import {
   calculateMortalityAdjustedPercentiles,
   runMonteCarloSimulation,
 } from "./monte-carlo";
-import { PensionParams, TabType } from "./types";
-import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "./state-pension";
+import { TabType } from "./types";
+import { calculateStatePensionAmount } from "./state-pension";
 import {
   CurrentSituationTab,
   ImportantNotes,
@@ -16,30 +16,21 @@ import {
 } from "./components";
 
 const PensionCalculator = () => {
-  const [currentAge, setCurrentAge] = useState(30);
-  const [currentPot, setCurrentPot] = useState(50000);
+  const [currentAge, setCurrentAge] = useState(45);
+  const [currentPot, setCurrentPot] = useState(250000);
   const [annualContribution, setAnnualContribution] = useState(10000);
-  const [growthRate, setGrowthRate] = useState(5);
+  const [growthRate, setGrowthRate] = useState(4.5);
   const [volatility, setVolatility] = useState(15);
   const [retirementAge, setRetirementAge] = useState(65);
-  const [annualDrawdown, setAnnualDrawdown] = useState(30000);
+  const [annualDrawdown, setAnnualDrawdown] = useState(45000);
   const [sex, setSex] = useState<"male" | "female">("male");
-  const [statePensionAmount, setStatePensionAmount] = useState(
-    CURRENT_FULL_STATE_PENSION_ANNUAL,
-  );
+  const [statePensionContributingYears, setStatePensionContributingYears] =
+    useState(35);
   const [activeTab, setActiveTab] = useState<TabType>("decisions");
 
-  const pensionParams: PensionParams = {
-    currentAge,
-    currentPot,
-    annualContribution,
-    growthRate,
-    volatility,
-    retirementAge,
-    annualDrawdown,
-    sex,
-    statePensionAmount,
-  };
+  const statePensionAmount = calculateStatePensionAmount(
+    statePensionContributingYears,
+  );
 
   const { percentileData, simulations } = useMemo(() => {
     const sims = runMonteCarloSimulation({
@@ -85,9 +76,13 @@ const PensionCalculator = () => {
             currentAge={currentAge}
             currentPot={currentPot}
             sex={sex}
+            statePensionContributingYears={statePensionContributingYears}
             onCurrentAgeChange={setCurrentAge}
             onCurrentPotChange={setCurrentPot}
             onSexChange={setSex}
+            onStatePensionContributingYearsChange={
+              setStatePensionContributingYears
+            }
           />
         );
       case "uncertainty":
@@ -106,11 +101,9 @@ const PensionCalculator = () => {
             annualContribution={annualContribution}
             retirementAge={retirementAge}
             annualDrawdown={annualDrawdown}
-            statePensionAmount={statePensionAmount}
             onAnnualContributionChange={setAnnualContribution}
             onRetirementAgeChange={setRetirementAge}
             onAnnualDrawdownChange={setAnnualDrawdown}
-            onStatePensionAmountChange={setStatePensionAmount}
           />
         );
       default:
