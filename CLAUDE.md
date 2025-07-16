@@ -36,7 +36,7 @@ projection logic:
 uncertainty:
 
 - `runMonteCarloSimulation()` - Runs 1000+ simulations with random returns
-- `generateNormalReturn()` - Creates normally distributed returns based on
+- `pickFromNormalDistribution()` - Creates normally distributed returns based on
   expected return ± volatility
 - `calculatePercentiles()` - Converts simulation results into 5th, 25th, 50th,
   75th, 95th percentiles

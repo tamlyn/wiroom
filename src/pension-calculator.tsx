@@ -43,25 +43,25 @@ const PensionCalculator = () => {
   };
 
   const { percentileData, simulations } = useMemo(() => {
-    const sims = runMonteCarloSimulation(
-      currentAge,
-      currentPot,
+    const sims = runMonteCarloSimulation({
+      startingAge: currentAge,
+      startingPot: currentPot,
       annualContribution,
-      growthRate,
+      expectedReturn: growthRate,
       volatility,
       retirementAge,
       annualDrawdown,
       sex,
       statePensionAmount,
-      100,
-      1000,
-    );
+      maxAge: 100,
+      numSimulations: 1000,
+    });
 
     const percentiles = calculateMortalityAdjustedPercentiles(
       sims,
       [5, 25, 50, 75, 95],
     );
-
+    console.log(`percentiles`, percentiles);
     return {
       percentileData: percentiles,
       simulations: sims,

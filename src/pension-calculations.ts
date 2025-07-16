@@ -1,38 +1,58 @@
-export interface PensionDataPoint {
+import { isEligibleForStatePension } from "./state-pension";
+import { pickFromNormalDistribution } from "./utils.ts";
+
+type PensionDataPoint = {
   age: number;
   potValue: number;
   phase: "Accumulation" | "Drawdown";
-}
+  deathAge: number;
+};
 
-import { isEligibleForStatePension } from "./state-pension";
+type PensionProjectionInput = {
+  startingAge: number;
+  startingPot: number;
+  annualContribution: number;
+  growthRate: number;
+  volatility: number;
+  retirementAge: number;
+  annualDrawdown: number;
+  statePensionAmount: number;
+  maxAge?: number;
+  deathAge: number;
+};
 
-export const calculatePensionProjection = (
-  currentAge: number,
-  currentPot: number,
-  annualContribution: number,
-  growthRate: number,
-  retirementAge: number,
-  annualDrawdown: number,
-  statePensionAmount: number,
+export const calculatePensionProjection = ({
+  startingAge,
+  startingPot,
+  annualContribution,
+  growthRate,
+  volatility,
+  retirementAge,
+  annualDrawdown,
+  statePensionAmount,
+  deathAge,
   maxAge = 100,
-): PensionDataPoint[] => {
+}: PensionProjectionInput): PensionDataPoint[] => {
   const data: PensionDataPoint[] = [];
-  let pot = currentPot;
+  let pot = startingPot;
 
-  for (let age = currentAge; age <= maxAge; age++) {
-    // Before retirement: add contributions and growth
+  for (let age = startingAge; age <= maxAge; age++) {
+    const randomReturn = pickFromNormalDistribution(
+      growthRate / 100,
+      volatility,
+    );
+
     if (age < retirementAge) {
-      if (age > currentAge) {
-        pot = pot * (1 + growthRate / 100) + annualContribution;
-      }
+      pot = pot * (1 + randomReturn) + annualContribution;
+    } else {
+      pot = pot * (1 + randomReturn) - annualDrawdown;
     }
-    // After retirement: subtract drawdowns, add growth, and add state pension if eligible
-    else {
-      pot = pot * (1 + growthRate / 100) - annualDrawdown;
-      if (isEligibleForStatePension(age, currentAge)) {
-        pot = pot + statePensionAmount;
-      }
+
+    if (isEligibleForStatePension(age, startingAge)) {
+      pot = pot + statePensionAmount;
     }
+
+    if (pot < 0) pot = 0;
 
     // Stop if pot reaches zero
     if (pot < 0) {
@@ -43,10 +63,10 @@ export const calculatePensionProjection = (
       age: age,
       potValue: Math.round(pot),
       phase: age < retirementAge ? "Accumulation" : "Drawdown",
+      deathAge,
     });
 
-    // Stop projecting if pot is depleted in drawdown phase
-    if (pot === 0 && age >= retirementAge) break;
+    // Continue simulation even if pot is 0 or person has died to avoid survival bias
   }
 
   return data;
