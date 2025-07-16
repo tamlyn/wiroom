@@ -37,15 +37,24 @@ export const calculatePensionProjection = ({
   let pot = startingPot;
 
   for (let age = startingAge; age <= maxAge; age++) {
-    const randomReturn = pickFromNormalDistribution(
-      growthRate / 100,
-      volatility,
-    );
+    // Record the current pot value at the beginning of the year
+    data.push({
+      age: age,
+      potValue: Math.round(pot),
+      phase: age < retirementAge ? "Accumulation" : "Drawdown",
+      deathAge,
+    });
+
+    // Apply growth and contributions/drawdowns for next year
+    const actualReturn =
+      volatility === 0
+        ? growthRate / 100
+        : pickFromNormalDistribution(growthRate / 100, volatility);
 
     if (age < retirementAge) {
-      pot = pot * (1 + randomReturn) + annualContribution;
+      pot = pot * (1 + actualReturn) + annualContribution;
     } else {
-      pot = pot * (1 + randomReturn) - annualDrawdown;
+      pot = pot * (1 + actualReturn) - annualDrawdown;
     }
 
     if (isEligibleForStatePension(age, startingAge)) {
@@ -53,18 +62,6 @@ export const calculatePensionProjection = ({
     }
 
     if (pot < 0) pot = 0;
-
-    // Stop if pot reaches zero
-    if (pot < 0) {
-      pot = 0;
-    }
-
-    data.push({
-      age: age,
-      potValue: Math.round(pot),
-      phase: age < retirementAge ? "Accumulation" : "Drawdown",
-      deathAge,
-    });
 
     // Continue simulation even if pot is 0 or person has died to avoid survival bias
   }

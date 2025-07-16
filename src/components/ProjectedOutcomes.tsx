@@ -47,7 +47,9 @@ export const ProjectedOutcomes = ({ simulations }: ProjectedOutcomesProps) => {
       </div>
 
       <div className="text-xs text-gray-500 mt-3 text-center">
-        Based on 1,000 Monte Carlo simulations with mortality modeling
+        Based on Based on {simulations.length.toLocaleString()} Monte Carlo
+        simulations with mortality Monte Carlo simulations with mortality
+        modeling
       </div>
     </div>
   );
