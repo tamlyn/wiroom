@@ -78,6 +78,7 @@ const PensionCalculator = () => {
     statePensionAmount,
   ]);
 
+  // TODO what is this for?
   const survivalRates = useMemo(() => {
     return calculateSurvivalRates(simulations);
   }, [simulations]);
@@ -139,10 +140,7 @@ const PensionCalculator = () => {
             </div>
           </div>
 
-          <ProjectedOutcomes
-            params={pensionParams}
-            percentileData={percentileData}
-          />
+          <ProjectedOutcomes simulations={simulations} />
         </div>
 
         {/* Right Column - Chart */}

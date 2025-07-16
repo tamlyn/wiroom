@@ -4,7 +4,7 @@ import { generateRandomDeathAge, type Sex } from "./mortality";
 export interface SimulationDataPoint {
   age: number;
   potValue: number;
-  deathAge?: number;
+  deathAge: number;
 }
 
 export interface PercentileDataPoint {
