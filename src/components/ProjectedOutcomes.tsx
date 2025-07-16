@@ -1,5 +1,6 @@
 import { PercentileDataPoint, SurvivalRate, PensionParams } from "../types";
 import { formatCurrency } from "../utils";
+import { getLifeExpectancy } from "../mortality";
 
 interface ProjectedOutcomesProps {
   params: PensionParams;
@@ -18,6 +19,16 @@ export const ProjectedOutcomes = ({
   const withdrawalRate = retirementStats.p50
     ? (params.annualDrawdown / retirementStats.p50) * 100
     : 0;
+
+  const currentLifeExpectancy = getLifeExpectancy(
+    params.currentAge,
+    params.sex,
+  );
+  const retirementLifeExpectancy = getLifeExpectancy(
+    params.retirementAge,
+    params.sex,
+  );
+  const expectedDeathAge = params.currentAge + currentLifeExpectancy;
 
   return (
     <div className="bg-gray-50 p-3 rounded-md">
@@ -63,21 +74,34 @@ export const ProjectedOutcomes = ({
           </div>
         </div>
         <div>
-          <p className="font-medium text-gray-700 mb-1">
-            Survival Probability:
-          </p>
+          <p className="font-medium text-gray-700 mb-1">Mortality Info:</p>
           <div className="space-y-0.5">
-            {survivalRates.map(({ age, rate }) => (
-              <p key={age}>
-                Age {age}: <span className="font-semibold">{rate}%</span>
-              </p>
-            ))}
+            <p>
+              Current life expectancy:{" "}
+              <span className="font-semibold">
+                {currentLifeExpectancy.toFixed(1)} years
+              </span>
+            </p>
+            <p>
+              Median death age:{" "}
+              <span className="font-semibold">
+                {expectedDeathAge.toFixed(0)}
+              </span>
+            </p>
+            <p>
+              Retirement life expectancy:{" "}
+              <span className="font-semibold">
+                {retirementLifeExpectancy.toFixed(1)} years
+              </span>
+            </p>
           </div>
         </div>
       </div>
 
       <div className="text-xs text-gray-500 flex items-center gap-1">
-        <span>Based on 1,000 Monte Carlo simulations</span>
+        <span>
+          Based on 1,000 Monte Carlo simulations with mortality modeling
+        </span>
         <span>•</span>
         <span>
           Age {params.currentAge} → {params.retirementAge}

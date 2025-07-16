@@ -6,6 +6,7 @@ export interface PensionParams {
   volatility: number;
   retirementAge: number;
   annualDrawdown: number;
+  sex: "male" | "female";
 }
 
 export interface SurvivalRate {

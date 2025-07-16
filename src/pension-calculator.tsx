@@ -1,15 +1,18 @@
-import { useState, useMemo } from "react";
-import { runMonteCarloSimulation, calculatePercentiles } from "./monte-carlo";
-import { calculateSurvivalRates } from "./utils";
-import { TabType, PensionParams } from "./types";
+import { useMemo, useState } from "react";
 import {
-  TabNavigation,
+  calculateMortalityAdjustedPercentiles,
+  runMonteCarloSimulation,
+} from "./monte-carlo";
+import { calculateSurvivalRates } from "./utils";
+import { PensionParams, TabType } from "./types";
+import {
   CurrentSituationTab,
-  MarketAssumptionsTab,
-  YourDecisionsTab,
-  ProjectedOutcomes,
-  PensionChart,
   ImportantNotes,
+  MarketAssumptionsTab,
+  PensionChart,
+  ProjectedOutcomes,
+  TabNavigation,
+  YourDecisionsTab,
 } from "./components";
 
 const PensionCalculator = () => {
@@ -20,6 +23,7 @@ const PensionCalculator = () => {
   const [volatility, setVolatility] = useState(15);
   const [retirementAge, setRetirementAge] = useState(65);
   const [annualDrawdown, setAnnualDrawdown] = useState(30000);
+  const [sex, setSex] = useState<"male" | "female">("male");
   const [activeTab, setActiveTab] = useState<TabType>("decisions");
 
   const pensionParams: PensionParams = {
@@ -30,6 +34,7 @@ const PensionCalculator = () => {
     volatility,
     retirementAge,
     annualDrawdown,
+    sex,
   };
 
   const { percentileData, simulations } = useMemo(() => {
@@ -41,11 +46,15 @@ const PensionCalculator = () => {
       volatility,
       retirementAge,
       annualDrawdown,
+      sex,
       100,
       1000,
     );
 
-    const percentiles = calculatePercentiles(sims, [5, 25, 50, 75, 95]);
+    const percentiles = calculateMortalityAdjustedPercentiles(
+      sims,
+      [5, 25, 50, 75, 95],
+    );
 
     return {
       percentileData: percentiles,
@@ -59,6 +68,7 @@ const PensionCalculator = () => {
     volatility,
     retirementAge,
     annualDrawdown,
+    sex,
   ]);
 
   const survivalRates = useMemo(() => {
@@ -72,8 +82,10 @@ const PensionCalculator = () => {
           <CurrentSituationTab
             currentAge={currentAge}
             currentPot={currentPot}
+            sex={sex}
             onCurrentAgeChange={setCurrentAge}
             onCurrentPotChange={setCurrentPot}
+            onSexChange={setSex}
           />
         );
       case "uncertainty":
