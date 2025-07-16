@@ -1,4 +1,4 @@
-import { PercentileDataPoint, SurvivalRate, PensionParams } from "../types";
+import { PercentileDataPoint, PensionParams } from "../types";
 import { formatCurrency } from "../utils";
 import { getLifeExpectancy } from "../mortality";
 import { getStatePensionEligibilityAge } from "../state-pension";
@@ -6,13 +6,11 @@ import { getStatePensionEligibilityAge } from "../state-pension";
 interface ProjectedOutcomesProps {
   params: PensionParams;
   percentileData: PercentileDataPoint[];
-  survivalRates: SurvivalRate[];
 }
 
 export const ProjectedOutcomes = ({
   params,
   percentileData,
-  survivalRates,
 }: ProjectedOutcomesProps) => {
   const retirementStats = percentileData.find(
     (d) => d.age === params.retirementAge,

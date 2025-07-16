@@ -40,7 +40,7 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
             tick={{ fontSize: 12 }}
           />
           <YAxis
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
             label={{ value: "Pot Value", angle: -90, position: "insideLeft" }}
             tick={{ fontSize: 12 }}
             domain={[0, yAxisMax]}
@@ -54,7 +54,6 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
                 const originalPoint = percentileData.find(
                   (p) => p.age === label,
                 );
-                const clampedPoint = payload[0]?.payload;
 
                 return (
                   <div className="bg-white p-2 border border-gray-200 rounded shadow-lg text-xs">

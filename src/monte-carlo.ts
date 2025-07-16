@@ -1,5 +1,4 @@
 import { calculatePensionProjection } from "./pension-calculations.ts";
-import { isEligibleForStatePension } from "./state-pension";
 import { generateRandomDeathAge, type Sex } from "./mortality";
 
 export interface SimulationDataPoint {
@@ -82,11 +81,7 @@ export const calculateMortalityAdjustedPercentiles = (
       const point = sim.find((p) => p.age === age);
       return point && point.deathAge && age < point.deathAge;
     });
-    console.log(
-      `aliveSimulations.length, minSampleSize`,
-      aliveSimulations.length,
-      minSampleSize,
-    );
+
     // Stop calculating percentiles if too few people are alive to get stable results
     if (aliveSimulations.length < minSampleSize) {
       break;

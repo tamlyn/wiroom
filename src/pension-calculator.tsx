@@ -142,7 +142,6 @@ const PensionCalculator = () => {
           <ProjectedOutcomes
             params={pensionParams}
             percentileData={percentileData}
-            survivalRates={survivalRates}
           />
         </div>
 

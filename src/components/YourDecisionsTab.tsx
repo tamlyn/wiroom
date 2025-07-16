@@ -87,7 +87,7 @@ export const YourDecisionsTab = ({
       <CollapsibleSection title="Optimization Tips">
         <div className="text-xs text-gray-700 space-y-1">
           <p>
-            • Increasing contributions by even $100/month can significantly
+            • Increasing contributions by even £100/month can significantly
             impact your retirement
           </p>
           <p>
