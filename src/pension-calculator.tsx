@@ -3,7 +3,6 @@ import {
   calculateMortalityAdjustedPercentiles,
   runMonteCarloSimulation,
 } from "./monte-carlo";
-import { calculateSurvivalRates } from "./utils";
 import { PensionParams, TabType } from "./types";
 import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "./state-pension";
 import {
@@ -77,11 +76,6 @@ const PensionCalculator = () => {
     sex,
     statePensionAmount,
   ]);
-
-  // TODO what is this for?
-  const survivalRates = useMemo(() => {
-    return calculateSurvivalRates(simulations);
-  }, [simulations]);
 
   const renderTabContent = () => {
     switch (activeTab) {
