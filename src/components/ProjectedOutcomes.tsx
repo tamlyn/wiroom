@@ -1,6 +1,7 @@
 import { PercentileDataPoint, SurvivalRate, PensionParams } from "../types";
 import { formatCurrency } from "../utils";
 import { getLifeExpectancy } from "../mortality";
+import { getStatePensionEligibilityAge } from "../state-pension";
 
 interface ProjectedOutcomesProps {
   params: PensionParams;
@@ -29,6 +30,7 @@ export const ProjectedOutcomes = ({
     params.sex,
   );
   const expectedDeathAge = params.currentAge + currentLifeExpectancy;
+  const statePensionAge = getStatePensionEligibilityAge(params.currentAge);
 
   return (
     <div className="bg-gray-50 p-3 rounded-md">
@@ -92,6 +94,13 @@ export const ProjectedOutcomes = ({
               Retirement life expectancy:{" "}
               <span className="font-semibold">
                 {retirementLifeExpectancy.toFixed(1)} years
+              </span>
+            </p>
+            <p>
+              State pension from age:{" "}
+              <span className="font-semibold">
+                {statePensionAge} ({formatCurrency(params.statePensionAmount)}
+                /year)
               </span>
             </p>
           </div>

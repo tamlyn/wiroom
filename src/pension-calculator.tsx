@@ -5,6 +5,7 @@ import {
 } from "./monte-carlo";
 import { calculateSurvivalRates } from "./utils";
 import { PensionParams, TabType } from "./types";
+import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "./state-pension";
 import {
   CurrentSituationTab,
   ImportantNotes,
@@ -24,6 +25,9 @@ const PensionCalculator = () => {
   const [retirementAge, setRetirementAge] = useState(65);
   const [annualDrawdown, setAnnualDrawdown] = useState(30000);
   const [sex, setSex] = useState<"male" | "female">("male");
+  const [statePensionAmount, setStatePensionAmount] = useState(
+    CURRENT_FULL_STATE_PENSION_ANNUAL,
+  );
   const [activeTab, setActiveTab] = useState<TabType>("decisions");
 
   const pensionParams: PensionParams = {
@@ -35,6 +39,7 @@ const PensionCalculator = () => {
     retirementAge,
     annualDrawdown,
     sex,
+    statePensionAmount,
   };
 
   const { percentileData, simulations } = useMemo(() => {
@@ -47,6 +52,7 @@ const PensionCalculator = () => {
       retirementAge,
       annualDrawdown,
       sex,
+      statePensionAmount,
       100,
       1000,
     );
@@ -69,6 +75,7 @@ const PensionCalculator = () => {
     retirementAge,
     annualDrawdown,
     sex,
+    statePensionAmount,
   ]);
 
   const survivalRates = useMemo(() => {
@@ -104,9 +111,11 @@ const PensionCalculator = () => {
             annualContribution={annualContribution}
             retirementAge={retirementAge}
             annualDrawdown={annualDrawdown}
+            statePensionAmount={statePensionAmount}
             onAnnualContributionChange={setAnnualContribution}
             onRetirementAgeChange={setRetirementAge}
             onAnnualDrawdownChange={setAnnualDrawdown}
+            onStatePensionAmountChange={setStatePensionAmount}
           />
         );
       default:

@@ -4,6 +4,8 @@ export interface PensionDataPoint {
   phase: "Accumulation" | "Drawdown";
 }
 
+import { isEligibleForStatePension } from "./state-pension";
+
 export const calculatePensionProjection = (
   currentAge: number,
   currentPot: number,
@@ -11,6 +13,7 @@ export const calculatePensionProjection = (
   growthRate: number,
   retirementAge: number,
   annualDrawdown: number,
+  statePensionAmount: number,
   maxAge = 100,
 ): PensionDataPoint[] => {
   const data: PensionDataPoint[] = [];
@@ -23,9 +26,12 @@ export const calculatePensionProjection = (
         pot = pot * (1 + growthRate / 100) + annualContribution;
       }
     }
-    // After retirement: subtract drawdowns and add growth
+    // After retirement: subtract drawdowns, add growth, and add state pension if eligible
     else {
       pot = pot * (1 + growthRate / 100) - annualDrawdown;
+      if (isEligibleForStatePension(age, currentAge)) {
+        pot = pot + statePensionAmount;
+      }
     }
 
     // Stop if pot reaches zero

@@ -28,7 +28,8 @@ projection logic:
 - Handles two phases: Accumulation (before retirement) and Drawdown (after
   retirement)
 - Accumulation: `pot = pot * (1 + growthRate) + annualContribution`
-- Drawdown: `pot = pot * (1 + growthRate) - annualDrawdown`
+- Drawdown: `pot = pot * (1 + growthRate) - annualDrawdown + statePension`
+- State pension income added at eligibility age (calculated from birth year)
 - Stops simulation when pot depletes during drawdown phase
 
 **`src/monte-carlo.ts`** - Monte Carlo simulation for modeling market
@@ -49,7 +50,7 @@ two-column layout (controls + chart)
 
 - `CurrentSituationTab.tsx` - Age, current pot, contributions
 - `MarketAssumptionsTab.tsx` - Expected returns and volatility
-- `YourDecisionsTab.tsx` - Retirement age and drawdown amount
+- `YourDecisionsTab.tsx` - Retirement age, drawdown amount, and state pension
 
 **Visualization**: `src/components/PensionChart.tsx`
 
@@ -77,6 +78,16 @@ two-column layout (controls + chart)
 
 ### Key Implementation Details
 
+**State Pension Integration**: `src/state-pension.ts` implements UK state
+pension rules:
+
+- Birth year-based eligibility age calculation (66-68 depending on birth year)
+- `getStatePensionEligibilityAge()` - Calculates state pension age from current
+  age
+- `isEligibleForStatePension()` - Determines if state pension should be added
+- Current full state pension: £11,973/year (2025-26 rate)
+- State pension income added during retirement phase only
+
 **Chart Scaling Solution**: The 95th percentile in optimistic scenarios can
 reach extreme values, making median/quartile lines appear flat. PensionChart.tsx
 solves this by:
@@ -85,11 +96,12 @@ solves this by:
 - Clamping p95 data points above this threshold to `undefined`
 - Preserving original unclamped values in custom tooltip
 
-**Test Coverage**: `src/pension-calculator.test.ts` contains 32 tests across 6
+**Test Coverage**: `src/pension-calculator.test.ts` contains 36 tests across 7
 categories:
 
 - Basic functionality, edge cases, mathematical precision
 - Realistic scenarios, stress tests, data integrity
+- State pension integration tests
 - Critical test: pot depletion only stops simulation in drawdown phase, not
   accumulation
 
@@ -100,6 +112,6 @@ year after. This is the expected behavior tested throughout the test suite.
 
 Key types in `src/types.ts`:
 
-- `PensionParams` - All user input parameters
+- `PensionParams` - All user input parameters (includes `statePensionAmount`)
 - `PercentileDataPoint` - Chart data with p5, p25, p50, p75, p95 values
 - `SurvivalRate` - Actuarial data for life expectancy calculations

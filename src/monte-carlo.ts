@@ -10,6 +10,7 @@ export interface PercentileDataPoint {
 }
 
 import { generateRandomDeathAge, type Sex } from "./mortality";
+import { isEligibleForStatePension } from "./state-pension";
 
 const generateNormalReturn = (mean: number, stdDev: number): number => {
   const u1 = Math.random();
@@ -27,6 +28,7 @@ export const runMonteCarloSimulation = (
   retirementAge: number,
   annualDrawdown: number,
   sex: Sex,
+  statePensionAmount: number,
   maxAge = 100,
   numSimulations = 1000,
 ): SimulationDataPoint[][] => {
@@ -46,6 +48,10 @@ export const runMonteCarloSimulation = (
           pot = pot * (1 + randomReturn) + annualContribution;
         } else {
           pot = pot * (1 + randomReturn) - annualDrawdown;
+        }
+
+        if (isEligibleForStatePension(age, currentAge)) {
+          pot = pot + statePensionAmount;
         }
       }
 

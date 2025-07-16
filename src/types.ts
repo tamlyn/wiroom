@@ -7,6 +7,7 @@ export interface PensionParams {
   retirementAge: number;
   annualDrawdown: number;
   sex: "male" | "female";
+  statePensionAmount: number;
 }
 
 export interface SurvivalRate {
