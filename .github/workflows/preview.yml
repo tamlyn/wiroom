@@ -105,6 +105,7 @@ jobs:
         with:
           ref: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Remove preview directory
         run: |
@@ -115,6 +116,8 @@ jobs:
             git add .
             git commit -m "Remove preview for PR #${{ github.event.number }}" || true
             git push
+          else
+            echo "Preview directory pr-${{ github.event.number }} not found, nothing to clean up."
           fi
 
       - name: Comment PR

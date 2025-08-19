@@ -28,3 +28,33 @@ retirement and if not, what you can change now to get there.
 
 The calculator uses UK-specific rules for state pension eligibility and current
 rates.
+
+## Development
+
+### Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+### PR Previews
+
+This repository automatically creates preview deployments for pull requests.
+When you open a PR:
+
+- A preview build is automatically created and deployed
+- A comment will be added to the PR with a link to the preview
+- The preview is updated automatically when you push new changes
+- Preview deployments are cleaned up when the PR is closed
+
+Preview URLs follow the pattern:
+`https://tamlyn.github.io/wiroom/pr-{PR_NUMBER}/`
+
+### Commands
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run test` - Run tests
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run format` - Format code with Prettier
