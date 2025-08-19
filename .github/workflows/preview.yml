@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: read
+  contents: write
   deployments: write
   pull-requests: write
   actions: read
@@ -43,27 +43,46 @@ jobs:
       - name: Build for preview
         run: npm run build
         env:
-          VITE_BASE_PATH: /
+          VITE_BASE_PATH: /wiroom/pr-${{ github.event.number }}/
 
-      - name: Install Surge CLI
-        run: npm install -g surge
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
 
-      - name: Deploy to Surge
-        id: surge_deploy
+      - name: Deploy to gh-pages
+        id: deploy
         run: |
-          SURGE_DOMAIN="pr-${{ github.event.number }}-wiroom.surge.sh"
-          echo "Deploying to https://$SURGE_DOMAIN"
-          surge ./dist $SURGE_DOMAIN --token ${{ secrets.SURGE_TOKEN }}
-          echo "preview_url=https://$SURGE_DOMAIN" >> $GITHUB_OUTPUT
-        env:
-          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+          # Ensure the pr directory exists
+          mkdir -p gh-pages/pr-${{ github.event.number }}
+          
+          # Copy built files to the PR directory
+          cp -r dist/* gh-pages/pr-${{ github.event.number }}/
+          
+          # Configure git
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add changes and commit
+          git add .
+          if ! git diff --staged --quiet; then
+            git commit -m "Deploy PR #${{ github.event.number }} preview"
+            git push origin gh-pages
+          else
+            echo "No changes to deploy"
+          fi
+          
+          # Set preview URL
+          PREVIEW_URL="https://${{ github.repository_owner }}.github.io/wiroom/pr-${{ github.event.number }}/"
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
       - name: Create deployment
-        id: deploy
         uses: actions/github-script@v7
         with:
           script: |
-            const previewUrl = '${{ steps.surge_deploy.outputs.preview_url }}';
+            const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
             
             // Create a deployment
             const deployment = await github.rest.repos.createDeployment({
@@ -83,18 +102,15 @@ jobs:
               deployment_id: deployment.data.id,
               state: 'success',
               target_url: previewUrl,
-              description: 'Preview deployed to Surge'
+              description: 'Preview deployed to GitHub Pages'
             });
-            
-            core.setOutput('preview_url', previewUrl);
-            core.setOutput('deployment_id', deployment.data.id);
 
       - name: Comment PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.issue.number;
-            const previewUrl = '${{ steps.surge_deploy.outputs.preview_url }}';
+            const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
             
             // Find existing preview comment
             const comments = await github.rest.issues.listComments({
@@ -117,7 +133,7 @@ jobs:
             This preview will be updated automatically when you push new changes to this PR.
             
             ---
-            <sub>Preview deployment powered by GitHub Actions + Surge</sub>`;
+            <sub>Preview deployment powered by GitHub Pages</sub>`;
             
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -139,16 +155,23 @@ jobs:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Install Surge CLI
-        run: npm install -g surge
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
 
-      - name: Remove Surge deployment
+      - name: Remove PR preview directory
         run: |
-          SURGE_DOMAIN="pr-${{ github.event.number }}-wiroom.surge.sh"
-          echo "Removing deployment at https://$SURGE_DOMAIN"
-          surge teardown $SURGE_DOMAIN --token ${{ secrets.SURGE_TOKEN }} || echo "Domain not found or already removed"
-        env:
-          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+          if [ -d "pr-${{ github.event.number }}" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            rm -rf pr-${{ github.event.number }}
+            git add .
+            git commit -m "Remove PR #${{ github.event.number }} preview" || echo "Nothing to remove"
+            git push origin gh-pages || echo "Nothing to push"
+          else
+            echo "PR preview directory not found"
+          fi
 
       - name: Deactivate deployment
         uses: actions/github-script@v7
