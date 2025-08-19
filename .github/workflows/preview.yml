@@ -5,10 +5,10 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: write
+  contents: read
+  deployments: write
   pull-requests: write
-  pages: write
-  id-token: write
+  actions: read
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -18,6 +18,9 @@ jobs:
   deploy-preview:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    environment:
+      name: pr-preview-${{ github.event.number }}
+      url: ${{ steps.deploy.outputs.preview_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,22 +43,54 @@ jobs:
       - name: Build for preview
         run: npm run build
         env:
-          VITE_BASE_PATH: /wiroom/pr-${{ github.event.number }}/
+          VITE_BASE_PATH: /
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          destination_dir: pr-${{ github.event.number }}
-          keep_files: true
+          name: pr-preview-${{ github.event.number }}
+          path: ./dist
+          retention-days: 30
+
+      - name: Create deployment
+        id: deploy
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Create a deployment
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: `pr-preview-${context.issue.number}`,
+              description: `Preview deployment for PR #${context.issue.number}`,
+              auto_merge: false,
+              required_contexts: []
+            });
+            
+            // Create a URL to the workflow run where the artifact can be downloaded
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const previewUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            // Update deployment status to success
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: 'success',
+              target_url: previewUrl,
+              description: 'Preview build artifact available'
+            });
+            
+            core.setOutput('preview_url', previewUrl);
+            core.setOutput('deployment_id', deployment.data.id);
 
       - name: Comment PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.issue.number;
-            const previewUrl = `https://tamlyn.github.io/wiroom/pr-${prNumber}/`;
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             
             // Find existing preview comment
             const comments = await github.rest.issues.listComments({
@@ -71,14 +106,16 @@ jobs:
             
             const commentBody = `## 🚀 Preview deployment
             
-            Your changes have been deployed to a preview environment:
+            Your changes have been built and are available for preview:
             
-            **🔗 [View Preview](${previewUrl})**
+            **📦 [Download Preview Artifact](${artifactUrl})**
+            
+            The build artifact contains the complete static site that you can extract and serve locally or deploy to any static hosting service.
             
             This preview will be updated automatically when you push new changes to this PR.
             
             ---
-            <sub>Preview deployment powered by GitHub Pages</sub>`;
+            <sub>Preview deployment powered by GitHub Actions</sub>`;
             
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -100,25 +137,34 @@ jobs:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
+      - name: Deactivate deployment
+        uses: actions/github-script@v7
         with:
-          ref: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Remove preview directory
-        run: |
-          if [ -d "pr-${{ github.event.number }}" ]; then
-            rm -rf pr-${{ github.event.number }}
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add .
-            git commit -m "Remove preview for PR #${{ github.event.number }}" || true
-            git push
-          else
-            echo "Preview directory pr-${{ github.event.number }} not found, nothing to clean up."
-          fi
+          script: |
+            const prNumber = context.issue.number;
+            const environmentName = `pr-preview-${prNumber}`;
+            
+            try {
+              // Get all deployments for this environment
+              const deployments = await github.rest.repos.listDeployments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                environment: environmentName
+              });
+              
+              // Mark deployments as inactive
+              for (const deployment of deployments.data) {
+                await github.rest.repos.createDeploymentStatus({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id,
+                  state: 'inactive',
+                  description: 'Preview environment deactivated'
+                });
+              }
+            } catch (error) {
+              console.log('No deployments found to deactivate:', error.message);
+            }
 
       - name: Comment PR
         uses: actions/github-script@v7
@@ -128,7 +174,7 @@ jobs:
             
             const commentBody = `## 🧹 Preview cleanup
             
-            The preview deployment for this PR has been removed.
+            The preview deployment for this PR has been deactivated.
             
             ---
             <sub>Cleanup completed by GitHub Actions</sub>`;
