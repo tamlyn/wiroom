@@ -40,16 +40,19 @@ npm run dev
 
 ### PR Previews
 
-This repository automatically creates preview deployments for pull requests.
-When you open a PR:
+This repository automatically creates live preview deployments for pull
+requests. When you open a PR:
 
-- A preview build is automatically created and deployed
-- A comment will be added to the PR with a link to the preview
+- A preview build is automatically created and deployed to Surge.sh
+- A comment will be added to the PR with a link to the live preview
 - The preview is updated automatically when you push new changes
 - Preview deployments are cleaned up when the PR is closed
 
-Preview URLs follow the pattern:
-`https://tamlyn.github.io/wiroom/pr-{PR_NUMBER}/`
+Preview URLs follow the pattern: `https://pr-{PR_NUMBER}-wiroom.surge.sh`
+
+**Setup Requirements:** To enable PR previews, the repository needs a
+`SURGE_TOKEN` secret configured in GitHub Settings > Secrets. This token allows
+the workflow to deploy to Surge.sh.
 
 ### Commands
 
