@@ -73,21 +73,9 @@ export const calculateMortalityAdjustedPercentiles = (
   const minAge = simulations[0][0]?.age || 0;
 
   const result: PercentileDataPoint[] = [];
-  const minSampleSize = Math.max(20, Math.floor(simulations.length * 0.02)); // At least 20 or 2% of simulations
   console.log(`minAge, maxAge`, minAge, maxAge);
   for (let age = minAge; age <= maxAge; age++) {
-    // Get all simulations that are alive at this age
-    const aliveSimulations = simulations.filter((sim) => {
-      const point = sim.find((p) => p.age === age);
-      return point && point.deathAge && age < point.deathAge;
-    });
-
-    // Stop calculating percentiles if too few people are alive to get stable results
-    if (aliveSimulations.length < minSampleSize) {
-      break;
-    }
-
-    const valuesAtAge = aliveSimulations
+    const valuesAtAge = simulations
       .map((sim) => sim.find((point) => point.age === age)?.potValue || 0)
       .sort((a, b) => a - b);
 
