@@ -14,6 +14,12 @@ interface YourDecisionsTabProps {
   onAnnualDrawdownChange: (value: number) => void;
 }
 
+const LIVING_STANDARD_PRESETS = [
+  { name: "Minimum", single: 13400, couple: 21600 },
+  { name: "Moderate", single: 31700, couple: 43900 },
+  { name: "Comfortable", single: 43900, couple: 60600 },
+];
+
 export const YourDecisionsTab = ({
   currentAge,
   annualContribution,
@@ -53,16 +59,34 @@ export const YourDecisionsTab = ({
         description={`(${retirementAge - currentAge} years from now)`}
       />
 
-      <InputSlider
-        label="Annual Drawdown in Retirement"
-        value={annualDrawdown}
-        onChange={onAnnualDrawdownChange}
-        min={0}
-        max={100000}
-        step={1000}
-        formatter={(value) => formatCurrency(value)}
-        description={`($${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
-      />
+      <div>
+        <InputSlider
+          label="Annual Drawdown in Retirement"
+          value={annualDrawdown}
+          onChange={onAnnualDrawdownChange}
+          min={0}
+          max={100000}
+          step={1000}
+          formatter={(value) => formatCurrency(value)}
+          description={`($${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
+        />
+        <div className="mt-2">
+          <p className="text-xs text-gray-600 mb-1.5">
+            UK Retirement Living Standards (single):
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {LIVING_STANDARD_PRESETS.map((preset) => (
+              <button
+                key={preset.name}
+                onClick={() => onAnnualDrawdownChange(preset.single)}
+                className="px-2.5 py-1 text-xs bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+              >
+                {preset.name} ({formatCurrency(preset.single)})
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <CollapsibleSection title="Optimization Tips">
         <div className="text-xs text-gray-700 space-y-1">
