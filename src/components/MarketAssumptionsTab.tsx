@@ -1,29 +1,30 @@
+import { RangeSlider } from "./RangeSlider";
 import { InputSlider } from "./InputSlider";
 import { InfoButton } from "./InfoButton";
 import { CollapsibleSection } from "./CollapsibleSection";
 
 interface MarketAssumptionsTabProps {
-  growthRate: number;
+  returnRange: [number, number];
   volatility: number;
-  onGrowthRateChange: (value: number) => void;
+  onReturnRangeChange: (value: [number, number]) => void;
   onVolatilityChange: (value: number) => void;
 }
 
 const ASSET_PRESETS = [
-  { name: "Cash", return: 0, volatility: 0 },
-  { name: "Bonds", return: 2, volatility: 5 },
-  { name: "60/40", return: 4.5, volatility: 11 },
-  { name: "Equity", return: 6, volatility: 17 },
+  { name: "Cash", returnRange: [-0.5, 0.5] as [number, number], volatility: 0 },
+  { name: "Bonds", returnRange: [1.5, 2.5] as [number, number], volatility: 5 },
+  { name: "60/40", returnRange: [3, 4] as [number, number], volatility: 11 },
+  { name: "Equity", returnRange: [4, 6] as [number, number], volatility: 17 },
 ];
 
 export const MarketAssumptionsTab = ({
-  growthRate,
+  returnRange,
   volatility,
-  onGrowthRateChange,
+  onReturnRangeChange,
   onVolatilityChange,
 }: MarketAssumptionsTabProps) => {
   const applyPreset = (preset: (typeof ASSET_PRESETS)[0]) => {
-    onGrowthRateChange(preset.return);
+    onReturnRangeChange(preset.returnRange);
     onVolatilityChange(preset.volatility);
   };
 
@@ -51,11 +52,11 @@ export const MarketAssumptionsTab = ({
         </div>
       </div>
 
-      <InputSlider
-        label="Expected Annual Return"
-        value={growthRate}
-        onChange={onGrowthRateChange}
-        min={0}
+      <RangeSlider
+        label="Expected Annual Return Range"
+        value={returnRange}
+        onChange={onReturnRangeChange}
+        min={-2}
         max={15}
         step={0.5}
         formatter={(value) => `${value}%`}
@@ -77,13 +78,18 @@ export const MarketAssumptionsTab = ({
             Returns and volatility are real (after-inflation) figures.
           </p>
           <p>
+            <span className="font-medium">Return range:</span> Models
+            uncertainty about the long-term average return. Each simulation
+            samples a different average return from this range.
+          </p>
+          <p>
+            <span className="font-medium">Volatility:</span> Models year-to-year
+            variation around the average return in each simulation.
+          </p>
+          <p>
             These presets are based on long-term historical data from developed
             markets. Actual results will vary, and past performance doesn't
             guarantee future returns.
-          </p>
-          <p>
-            <span className="font-medium">Volatility guide:</span> Cash (0%),
-            Bonds (4-6%), Balanced (10-12%), Equity (15-20%)
           </p>
         </div>
       </CollapsibleSection>

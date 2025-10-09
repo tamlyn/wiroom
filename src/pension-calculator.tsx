@@ -19,7 +19,7 @@ const PensionCalculator = () => {
   const [currentAge, setCurrentAge] = useState(45);
   const [currentPot, setCurrentPot] = useState(250000);
   const [annualContribution, setAnnualContribution] = useState(10000);
-  const [growthRate, setGrowthRate] = useState(4.5);
+  const [returnRange, setReturnRange] = useState<[number, number]>([4, 5]);
   const [volatility, setVolatility] = useState(15);
   const [retirementAge, setRetirementAge] = useState(65);
   const [annualDrawdown, setAnnualDrawdown] = useState(45000);
@@ -37,14 +37,14 @@ const PensionCalculator = () => {
       startingAge: currentAge,
       startingPot: currentPot,
       annualContribution,
-      expectedReturn: growthRate,
+      returnRange,
       volatility,
       retirementAge,
       annualDrawdown,
       sex,
       statePensionAmount,
       maxAge: 100,
-      numSimulations: 1000,
+      numSimulations: 10000,
     });
 
     const percentiles = calculateMortalityAdjustedPercentiles(
@@ -60,7 +60,7 @@ const PensionCalculator = () => {
     currentAge,
     currentPot,
     annualContribution,
-    growthRate,
+    returnRange,
     volatility,
     retirementAge,
     annualDrawdown,
@@ -88,9 +88,9 @@ const PensionCalculator = () => {
       case "uncertainty":
         return (
           <MarketAssumptionsTab
-            growthRate={growthRate}
+            returnRange={returnRange}
             volatility={volatility}
-            onGrowthRateChange={setGrowthRate}
+            onReturnRangeChange={setReturnRange}
             onVolatilityChange={setVolatility}
           />
         );

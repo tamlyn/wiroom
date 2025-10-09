@@ -1,5 +1,6 @@
 import { calculatePensionProjection } from "./pension-calculations.ts";
 import { generateRandomDeathAge, type Sex } from "./mortality";
+import { pickFromNormalDistribution } from "./utils";
 
 export interface SimulationDataPoint {
   age: number;
@@ -16,7 +17,7 @@ interface SimulationInput {
   startingAge: number;
   startingPot: number;
   annualContribution: number;
-  expectedReturn: number;
+  returnRange: [number, number];
   volatility: number;
   retirementAge: number;
   annualDrawdown: number;
@@ -30,7 +31,7 @@ export const runMonteCarloSimulation = ({
   startingAge,
   startingPot,
   annualContribution,
-  expectedReturn,
+  returnRange,
   volatility,
   retirementAge,
   annualDrawdown,
@@ -43,11 +44,18 @@ export const runMonteCarloSimulation = ({
 
   for (let sim = 0; sim < numSimulations; sim++) {
     const deathAge = generateRandomDeathAge(startingAge, sex);
+
+    // Sample a return from the range using normal distribution
+    // Treat the range as the mean ± 2 standard deviations (~95% confidence interval)
+    const mean = (returnRange[0] + returnRange[1]) / 2;
+    const stdDev = (returnRange[1] - returnRange[0]) / 4;
+    const sampledReturn = pickFromNormalDistribution(mean, stdDev * 100);
+
     let projection = calculatePensionProjection({
       startingAge,
       startingPot,
       annualContribution,
-      growthRate: expectedReturn,
+      growthRate: sampledReturn,
       volatility,
       retirementAge,
       annualDrawdown,
