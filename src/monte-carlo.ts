@@ -73,7 +73,7 @@ export const calculateMortalityAdjustedPercentiles = (
   const minAge = simulations[0][0]?.age || 0;
 
   const result: PercentileDataPoint[] = [];
-  console.log(`minAge, maxAge`, minAge, maxAge);
+
   for (let age = minAge; age <= maxAge; age++) {
     const valuesAtAge = simulations
       .map((sim) => sim.find((point) => point.age === age)?.potValue || 0)

@@ -51,7 +51,7 @@ const PensionCalculator = () => {
       sims,
       [5, 25, 50, 75, 95],
     );
-    console.log(`percentiles`, percentiles);
+
     return {
       percentileData: percentiles,
       simulations: sims,

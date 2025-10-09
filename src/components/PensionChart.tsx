@@ -9,9 +9,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { PercentileDataPoint } from "../types";
 import { formatCurrency } from "../utils";
 import { CollapsibleSection } from "./CollapsibleSection";
+import type { PercentileDataPoint } from "../monte-carlo.ts";
 
 interface PensionChartProps {
   percentileData: PercentileDataPoint[];
@@ -23,7 +23,11 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
 
   // Transform data to create stackable bands
   const clampedData = percentileData.map((point) => {
-    const clampedP95 = point.p95 && point.p95 < yAxisMax ? point.p95 : yAxisMax;
+    const clampedP95 = point.p95
+      ? point.p95 < yAxisMax
+        ? point.p95
+        : yAxisMax
+      : 0;
     return {
       age: point.age,
       p5: point.p5,
@@ -62,6 +66,7 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
             dataKey="age"
             label={{ value: "Age", position: "insideBottom", offset: -5 }}
             tick={{ fontSize: 12 }}
+            interval={2}
           />
           <YAxis
             tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
