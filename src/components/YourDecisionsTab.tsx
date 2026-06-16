@@ -46,7 +46,7 @@ export const YourDecisionsTab = ({
         max={50000}
         step={500}
         formatter={(value) => formatCurrency(value)}
-        description={`($${Math.round(annualContribution / 12).toLocaleString()} per month)`}
+        description={`(£${Math.round(annualContribution / 12).toLocaleString()} per month)`}
       />
 
       <InputSlider
@@ -68,7 +68,7 @@ export const YourDecisionsTab = ({
           max={100000}
           step={1000}
           formatter={(value) => formatCurrency(value)}
-          description={`($${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
+          description={`(£${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
         />
         <div className="mt-2">
           <p className="text-xs text-gray-600 mb-1.5">

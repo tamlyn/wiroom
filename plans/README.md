@@ -25,7 +25,7 @@ backend). Verification commands for every plan:
 | Plan | Title                                                      | Priority | Effort | Depends on | Status |
 | ---- | ---------------------------------------------------------- | -------- | ------ | ---------- | ------ |
 | 001  | Characterization tests for the simulation/aggregation path | P1       | M      | —          | DONE   |
-| 002  | Fix currency symbol and garbled caption in the UI          | P1       | S      | —          | TODO   |
+| 002  | Fix currency symbol and garbled caption in the UI          | P1       | S      | —          | DONE   |
 | 003  | Correct the stale/wrong facts in CLAUDE.md                 | P2       | S      | —          | TODO   |
 | 004  | Make percentile aggregation O(n) instead of O(n²)          | P1       | S      | 001        | TODO   |
 | 005  | Stop counting accumulation-phase £0 pot as "running out"   | P2       | S      | 001        | TODO   |
