@@ -1,12 +1,15 @@
 import { describe, it, expect } from "vitest";
 import {
   getLifeExpectancy,
-  lifeExpectancyToDeathProbability,
   getAnnualDeathProbability,
   generateRandomDeathAge,
   getSurvivalProbability,
   type Sex,
 } from "./mortality";
+
+// A representative birth cohort for the cohort-aware probability helpers. Born
+// 1990, so age 30 lands on calendar year 2020 (the start of the projection).
+const BIRTH_YEAR = 1990;
 
 describe("mortality functions", () => {
   describe("getLifeExpectancy", () => {
@@ -24,50 +27,26 @@ describe("mortality functions", () => {
     });
   });
 
-  describe("lifeExpectancyToDeathProbability", () => {
-    it("should return 1 for zero or negative life expectancy", () => {
-      expect(lifeExpectancyToDeathProbability(0)).toBe(1);
-      expect(lifeExpectancyToDeathProbability(-5)).toBe(1);
-    });
-
-    it("should return reasonable probabilities for typical life expectancies", () => {
-      const prob20 = lifeExpectancyToDeathProbability(20);
-      const prob40 = lifeExpectancyToDeathProbability(40);
-      const prob1 = lifeExpectancyToDeathProbability(1);
-
-      expect(prob20).toBeGreaterThan(0);
-      expect(prob20).toBeLessThan(1);
-      expect(prob40).toBeGreaterThan(0);
-      expect(prob40).toBeLessThan(prob20);
-      expect(prob1).toBeGreaterThan(prob20);
-    });
-
-    it("should approach 0 as life expectancy increases", () => {
-      const prob100 = lifeExpectancyToDeathProbability(100);
-      expect(prob100).toBeLessThan(0.02);
-    });
-  });
-
   describe("getAnnualDeathProbability", () => {
     it("should return higher probabilities for older ages", () => {
-      const prob30Male = getAnnualDeathProbability(30, "male");
-      const prob70Male = getAnnualDeathProbability(70, "male");
-      const prob90Male = getAnnualDeathProbability(90, "male");
+      const prob30Male = getAnnualDeathProbability(30, "male", BIRTH_YEAR);
+      const prob70Male = getAnnualDeathProbability(70, "male", BIRTH_YEAR);
+      const prob90Male = getAnnualDeathProbability(90, "male", BIRTH_YEAR);
 
       expect(prob70Male).toBeGreaterThan(prob30Male);
       expect(prob90Male).toBeGreaterThan(prob70Male);
     });
 
     it("should return different probabilities for males and females", () => {
-      const prob65Male = getAnnualDeathProbability(65, "male");
-      const prob65Female = getAnnualDeathProbability(65, "female");
+      const prob65Male = getAnnualDeathProbability(65, "male", BIRTH_YEAR);
+      const prob65Female = getAnnualDeathProbability(65, "female", BIRTH_YEAR);
 
       expect(prob65Male).toBeGreaterThan(prob65Female);
     });
 
-    it("should return 1 for ages beyond life expectancy data", () => {
-      expect(getAnnualDeathProbability(150, "male")).toBe(1);
-      expect(getAnnualDeathProbability(150, "female")).toBe(1);
+    it("should return 1 for ages beyond the mortality table", () => {
+      expect(getAnnualDeathProbability(150, "male", BIRTH_YEAR)).toBe(1);
+      expect(getAnnualDeathProbability(150, "female", BIRTH_YEAR)).toBe(1);
     });
   });
 
@@ -82,28 +61,24 @@ describe("mortality functions", () => {
       }
     });
 
-    it("should generate reasonable death ages for typical scenarios", () => {
-      const currentAge = 30;
-      const sex: Sex = "male";
-      const deathAges: number[] = [];
+    it("produces a mean death age matching life expectancy (the model's core correctness)", () => {
+      const N = 50000;
+      const cases: Array<{ age: number; sex: Sex }> = [
+        { age: 30, sex: "male" },
+        { age: 30, sex: "female" },
+        { age: 65, sex: "male" },
+        { age: 65, sex: "female" },
+      ];
 
-      for (let i = 0; i < 1000; i++) {
-        deathAges.push(generateRandomDeathAge(currentAge, sex));
+      for (const { age, sex } of cases) {
+        let total = 0;
+        for (let i = 0; i < N; i++) total += generateRandomDeathAge(age, sex);
+        const meanDeathAge = total / N;
+        const expected = age + getLifeExpectancy(age, sex);
+        // Monte Carlo curtate expectation is ~0.5yr below the complete e(x);
+        // ±2 years absorbs that plus q_x vintage differences.
+        expect(Math.abs(meanDeathAge - expected)).toBeLessThan(2);
       }
-
-      const avgDeathAge =
-        deathAges.reduce((sum, age) => sum + age, 0) / deathAges.length;
-      const expectedDeathAge = currentAge + getLifeExpectancy(currentAge, sex);
-
-      // Log for debugging
-      console.log(
-        `Average death age: ${avgDeathAge}, Expected: ${expectedDeathAge}`,
-      );
-
-      // The discrete annual approach may not perfectly match life expectancy
-      // The algorithm should produce reasonable results though
-      expect(avgDeathAge).toBeGreaterThan(currentAge);
-      expect(avgDeathAge).toBeLessThan(120); // Reasonable upper bound
     });
 
     it("should eventually terminate even for very old starting ages", () => {
@@ -114,14 +89,14 @@ describe("mortality functions", () => {
 
   describe("getSurvivalProbability", () => {
     it("should return 1 for same or past ages", () => {
-      expect(getSurvivalProbability(65, 65, "male")).toBe(1);
-      expect(getSurvivalProbability(65, 60, "male")).toBe(1);
+      expect(getSurvivalProbability(65, 65, "male", BIRTH_YEAR)).toBe(1);
+      expect(getSurvivalProbability(65, 60, "male", BIRTH_YEAR)).toBe(1);
     });
 
     it("should return decreasing probabilities for longer time periods", () => {
-      const prob1Year = getSurvivalProbability(65, 66, "male");
-      const prob5Years = getSurvivalProbability(65, 70, "male");
-      const prob20Years = getSurvivalProbability(65, 85, "male");
+      const prob1Year = getSurvivalProbability(65, 66, "male", BIRTH_YEAR);
+      const prob5Years = getSurvivalProbability(65, 70, "male", BIRTH_YEAR);
+      const prob20Years = getSurvivalProbability(65, 85, "male", BIRTH_YEAR);
 
       expect(prob1Year).toBeGreaterThan(prob5Years);
       expect(prob5Years).toBeGreaterThan(prob20Years);
@@ -129,14 +104,14 @@ describe("mortality functions", () => {
     });
 
     it("should return higher survival probabilities for females", () => {
-      const probMale = getSurvivalProbability(65, 75, "male");
-      const probFemale = getSurvivalProbability(65, 75, "female");
+      const probMale = getSurvivalProbability(65, 75, "male", BIRTH_YEAR);
+      const probFemale = getSurvivalProbability(65, 75, "female", BIRTH_YEAR);
 
       expect(probFemale).toBeGreaterThan(probMale);
     });
 
     it("should return probabilities between 0 and 1", () => {
-      const prob = getSurvivalProbability(30, 80, "male");
+      const prob = getSurvivalProbability(30, 80, "male", BIRTH_YEAR);
       expect(prob).toBeGreaterThan(0);
       expect(prob).toBeLessThan(1);
     });
@@ -151,14 +126,14 @@ describe("mortality functions", () => {
     it("should generate consistent death probabilities", () => {
       const age = 50;
       const sex: Sex = "female";
-      const prob1 = getAnnualDeathProbability(age, sex);
-      const prob2 = getAnnualDeathProbability(age, sex);
+      const prob1 = getAnnualDeathProbability(age, sex, BIRTH_YEAR);
+      const prob2 = getAnnualDeathProbability(age, sex, BIRTH_YEAR);
 
       expect(prob1).toBe(prob2);
     });
 
     it("should handle very high ages in survival probability calculations", () => {
-      const prob = getSurvivalProbability(95, 100, "male");
+      const prob = getSurvivalProbability(95, 100, "male", BIRTH_YEAR);
       expect(prob).toBeGreaterThan(0);
       expect(prob).toBeLessThan(1);
     });

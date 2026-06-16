@@ -29,9 +29,21 @@ backend). Verification commands for every plan:
 | 003  | Correct the stale/wrong facts in CLAUDE.md                 | P2       | S      | —          | DONE   |
 | 004  | Make percentile aggregation O(n) instead of O(n²)          | P1       | S      | 001        | DONE   |
 | 005  | Stop counting accumulation-phase £0 pot as "running out"   | P2       | S      | 001        | DONE   |
-| 006  | Replace the broken mortality model with a real qₓ table    | P1       | L      | 001        | TODO   |
+| 006  | Replace the broken mortality model with a real qₓ table    | P1       | L      | 001        | DONE\* |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (reason) | REJECTED (reason)
+
+> \*006 deviated from the plan's single qₓ-by-age table (maintainer-approved).
+> The repo's `life-expectancy.ts` is a _multi-cohort_ snapshot, which no single
+> qₓ-by-age array can reproduce via the year-by-year walk. Instead we store the
+> real ONS 2020-based **period** mortality surface
+> (`src/data/mortality-rates.ts`, sourced from `ukppp20qx.xlsx`) and read it
+> along each person's cohort diagonal
+> (`birthYear = REFERENCE_YEAR − currentAge`). This reproduces the cohort life
+> expectancies at every age, keeps lifespan variability, and passes the Step 4
+> cross-check (worst gate error ≈1.4yr < 2). `getAnnualDeathProbability` /
+> `getSurvivalProbability` gained a `birthYear` parameter;
+> `generateRandomDeathAge` and `monte-carlo.ts` are unchanged at the call site.
 
 ## Dependency notes
 
