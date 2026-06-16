@@ -12,7 +12,11 @@ export const calculateRunOutChance = (
   let runOutCount = 0;
 
   for (const simulation of simulations) {
-    if (simulation.some((x) => x.age <= x.deathAge && x.potValue <= 0)) {
+    if (
+      simulation.some(
+        (x) => x.phase === "Drawdown" && x.age <= x.deathAge && x.potValue <= 0,
+      )
+    ) {
       runOutCount++;
     }
   }

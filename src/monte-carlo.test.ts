@@ -7,17 +7,23 @@ import {
 import { calculateRunOutChance } from "./components/ProjectedOutcomes";
 
 // Build one simulation: ages startAge..startAge+potValues.length-1, one point
-// per year, all sharing the same deathAge.
+// per year, all sharing the same deathAge. retirementAge defaults to startAge,
+// so by default every point is in the Drawdown phase.
 const makeSim = (
   startAge: number,
   potValues: number[],
   deathAge: number,
+  retirementAge: number = startAge,
 ): SimulationDataPoint[] =>
-  potValues.map((potValue, i) => ({
-    age: startAge + i,
-    potValue,
-    deathAge,
-  }));
+  potValues.map((potValue, i) => {
+    const age = startAge + i;
+    return {
+      age,
+      potValue,
+      phase: age < retirementAge ? "Accumulation" : "Drawdown",
+      deathAge,
+    };
+  });
 
 describe("calculateMortalityAdjustedPercentiles", () => {
   it("returns [] for no simulations", () => {
@@ -90,6 +96,13 @@ describe("calculateRunOutChance", () => {
     ];
     // 1 of 4 -> 25%
     expect(calculateRunOutChance(sims)).toBe(25);
+  });
+
+  it("does not count an accumulation-phase £0 balance as running out", () => {
+    // £0 starting pot at age 30, retiring at 65, dying at 80.
+    // Every point shown here is in the Accumulation phase.
+    const sims = [makeSim(30, [0, 8000, 16000], 80, 65)];
+    expect(calculateRunOutChance(sims)).toBe(0);
   });
 });
 

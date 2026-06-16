@@ -5,6 +5,7 @@ import { pickFromNormalDistribution } from "./utils";
 export interface SimulationDataPoint {
   age: number;
   potValue: number;
+  phase: "Accumulation" | "Drawdown";
   deathAge: number;
 }
 
