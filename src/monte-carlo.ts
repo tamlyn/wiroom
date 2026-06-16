@@ -70,6 +70,26 @@ export const runMonteCarloSimulation = ({
   return simulations;
 };
 
+export const calculateRunOutChance = (
+  simulations: SimulationDataPoint[][],
+): number => {
+  if (!simulations.length) return 0;
+
+  let runOutCount = 0;
+
+  for (const simulation of simulations) {
+    if (
+      simulation.some(
+        (x) => x.phase === "Drawdown" && x.age <= x.deathAge && x.potValue <= 0,
+      )
+    ) {
+      runOutCount++;
+    }
+  }
+
+  return Math.round((runOutCount / simulations.length) * 100);
+};
+
 export const calculateMortalityAdjustedPercentiles = (
   simulations: SimulationDataPoint[][],
   percentiles = [5, 25, 50, 75, 95],

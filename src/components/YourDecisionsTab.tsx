@@ -1,8 +1,7 @@
 import { InputSlider } from "./InputSlider";
-import { InfoButton } from "./InfoButton";
-import { CollapsibleSection } from "./CollapsibleSection";
+import { FineTuneGroup } from "./FineTuneGroup";
 import { formatCurrency } from "../utils";
-import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "../state-pension";
+import { LIVING_STANDARDS, matchLivingStandard } from "../presets";
 
 interface YourDecisionsTabProps {
   currentAge: number;
@@ -14,11 +13,8 @@ interface YourDecisionsTabProps {
   onAnnualDrawdownChange: (value: number) => void;
 }
 
-const LIVING_STANDARD_PRESETS = [
-  { name: "Minimum", single: 13400, couple: 21600 },
-  { name: "Moderate", single: 31700, couple: 43900 },
-  { name: "Comfortable", single: 43900, couple: 60600 },
-];
+const perMonth = (annual: number) =>
+  `· £${Math.round(annual / 12).toLocaleString()}/mo`;
 
 export const YourDecisionsTab = ({
   currentAge,
@@ -29,90 +25,108 @@ export const YourDecisionsTab = ({
   onRetirementAgeChange,
   onAnnualDrawdownChange,
 }: YourDecisionsTabProps) => {
+  const activeStandard = matchLivingStandard(annualDrawdown);
+  const yearsToRetirement = retirementAge - currentAge;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <h3 className="text-base font-semibold text-gray-800">
-          Your Decisions
-        </h3>
-        <InfoButton content="These are the factors you can control to improve your retirement outcomes. Small changes can have big impacts over time." />
-      </div>
+    <div>
+      <h2 className="text-[19px] font-bold text-ink mb-[4px]">
+        The choices you can make
+      </h2>
+      <p className="text-[13.5px] leading-[1.5] text-muted mb-[30px]">
+        These are the levers in your control. Try them and watch the run-out
+        chance respond.
+      </p>
 
-      <InputSlider
-        label="Annual Contribution"
-        value={annualContribution}
-        onChange={onAnnualContributionChange}
-        min={0}
-        max={50000}
-        step={500}
-        formatter={(value) => formatCurrency(value)}
-        description={`(£${Math.round(annualContribution / 12).toLocaleString()} per month)`}
-      />
-
-      <InputSlider
-        label="Retirement Age"
-        value={retirementAge}
-        onChange={onRetirementAgeChange}
-        min={currentAge + 1}
-        max={100}
-        formatter={(value) => value.toString()}
-        description={`(${retirementAge - currentAge} years from now)`}
-      />
-
-      <div>
+      <div className="space-y-[30px]">
         <InputSlider
-          label="Annual Drawdown in Retirement"
-          value={annualDrawdown}
-          onChange={onAnnualDrawdownChange}
+          label="Annual contribution"
+          value={annualContribution}
+          onChange={onAnnualContributionChange}
           min={0}
-          max={100000}
-          step={1000}
-          formatter={(value) => formatCurrency(value)}
-          description={`(£${Math.round(annualDrawdown / 12).toLocaleString()} per month)`}
+          max={50000}
+          step={500}
+          formatter={formatCurrency}
+          valueSuffix={perMonth(annualContribution)}
+          description="Including any tax relief."
         />
-        <div className="mt-2">
-          <p className="text-xs text-gray-600 mb-1.5">
-            UK Retirement Living Standards (single):
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            {LIVING_STANDARD_PRESETS.map((preset) => (
-              <button
-                key={preset.name}
-                onClick={() => onAnnualDrawdownChange(preset.single)}
-                className="px-2.5 py-1 text-xs bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
-              >
-                {preset.name} ({formatCurrency(preset.single)})
-              </button>
-            ))}
+
+        <InputSlider
+          label="Retirement age"
+          value={retirementAge}
+          onChange={onRetirementAgeChange}
+          min={currentAge + 1}
+          max={100}
+          valueSuffix={`· in ${yearsToRetirement} ${
+            yearsToRetirement === 1 ? "year" : "years"
+          }`}
+          minLabel={String(currentAge + 1)}
+          maxLabel="100"
+        />
+
+        <div>
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-muted mb-[11px]">
+            Drawdown presets
           </div>
+          <div className="flex border border-line-strong">
+            {LIVING_STANDARDS.map((standard, index) => {
+              const active = annualDrawdown === standard.single;
+              return (
+                <button
+                  key={standard.name}
+                  type="button"
+                  onClick={() => onAnnualDrawdownChange(standard.single)}
+                  className={`flex-1 text-left px-[12px] py-[11px] transition-colors ${
+                    index > 0 && !active ? "border-l border-line-strong" : ""
+                  } ${active ? "bg-ink" : "hover:bg-[rgba(21,24,30,0.04)]"}`}
+                >
+                  <div
+                    className={`text-[13px] font-semibold ${
+                      active ? "text-[#B7C0CC]" : "text-inksoft"
+                    }`}
+                  >
+                    {standard.name}
+                  </div>
+                  <div
+                    className={`text-[14px] font-bold mt-[2px] ${
+                      active ? "text-white" : "text-ink"
+                    }`}
+                  >
+                    {formatCurrency(standard.single)}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-[11.5px] text-muted mt-[8px]">
+            UK retirement living standards · single person.
+          </div>
+
+          <FineTuneGroup
+            caption={
+              activeStandard ? (
+                <>
+                  Set by <span className="text-ink">{activeStandard.name}</span>
+                </>
+              ) : (
+                "Custom"
+              )
+            }
+          >
+            <InputSlider
+              label="Annual drawdown in retirement"
+              value={annualDrawdown}
+              onChange={onAnnualDrawdownChange}
+              min={0}
+              max={100000}
+              step={1000}
+              formatter={formatCurrency}
+              valueSuffix={perMonth(annualDrawdown)}
+              description="In today's money."
+            />
+          </FineTuneGroup>
         </div>
       </div>
-
-      <CollapsibleSection title="Optimization Tips">
-        <div className="text-xs text-gray-700 space-y-1">
-          <p>
-            • Increasing contributions by even £100/month can significantly
-            impact your retirement
-          </p>
-          <p>
-            • Delaying retirement by 1-2 years can dramatically improve outcomes
-          </p>
-          <p>
-            • Consider the 4% rule: annual drawdown of 4% of initial pot often
-            lasts 30+ years
-          </p>
-          <p>
-            • State pension: Full UK state pension is currently{" "}
-            {formatCurrency(CURRENT_FULL_STATE_PENSION_ANNUAL)}/year
-          </p>
-          <p>
-            • Withdrawal rate colors:{" "}
-            <span className="text-green-600">green ≤4%</span>,{" "}
-            <span className="text-amber-600">amber 4-6%</span>,{" "}
-            <span className="text-red-600">red &gt;6%</span>
-          </p>
-        </div>
-      </CollapsibleSection>
     </div>
   );
 };

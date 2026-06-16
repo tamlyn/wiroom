@@ -1,5 +1,5 @@
 import { InputSlider } from "./InputSlider";
-import { InfoButton } from "./InfoButton";
+import { SegmentedControl } from "./SegmentedControl";
 import { formatCurrency } from "../utils";
 import { calculateStatePensionAmount } from "../state-pension";
 
@@ -24,77 +24,67 @@ export const CurrentSituationTab = ({
   onSexChange,
   onStatePensionContributingYearsChange,
 }: CurrentSituationTabProps) => {
+  const statePensionAmount = calculateStatePensionAmount(
+    statePensionContributingYears,
+  );
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <h3 className="text-base font-semibold text-gray-800">
-          Your Current Situation
-        </h3>
-        <InfoButton content="These are the facts about where you are today. Your current age and existing pension pot value." />
-      </div>
+    <div>
+      <h2 className="text-[19px] font-bold text-ink mb-[4px]">
+        Your current situation
+      </h2>
+      <p className="text-[13.5px] leading-[1.5] text-muted mb-[30px]">
+        A few facts about where you stand today.
+      </p>
 
-      <InputSlider
-        label="Current Age"
-        value={currentAge}
-        onChange={onCurrentAgeChange}
-        min={18}
-        max={100}
-        formatter={(value) => value.toString()}
-      />
+      <div className="space-y-[30px]">
+        <InputSlider
+          label="Current age"
+          value={currentAge}
+          onChange={onCurrentAgeChange}
+          min={18}
+          max={100}
+        />
 
-      <InputSlider
-        label="Current Pension Pot"
-        value={currentPot}
-        onChange={onCurrentPotChange}
-        min={0}
-        max={500000}
-        step={5000}
-        formatter={(value) => formatCurrency(value)}
-      />
+        <InputSlider
+          label="Current pension pot"
+          value={currentPot}
+          onChange={onCurrentPotChange}
+          min={0}
+          max={500000}
+          step={5000}
+          formatter={formatCurrency}
+        />
 
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Sex</label>
-          <InfoButton content="Biological sex affects life expectancy and is used for mortality modeling in the projections." />
+        <div>
+          <div className="text-[15px] font-semibold text-ink mb-[13px]">
+            Sex{" "}
+            <span className="text-[12.5px] font-medium text-muted">
+              · affects life expectancy
+            </span>
+          </div>
+          <SegmentedControl
+            value={sex}
+            onChange={onSexChange}
+            options={[
+              { value: "male", label: "Male" },
+              { value: "female", label: "Female" },
+            ]}
+          />
         </div>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="sex"
-              value="male"
-              checked={sex === "male"}
-              onChange={(e) => onSexChange(e.target.value as "male" | "female")}
-              className="text-blue-600"
-            />
-            <span className="text-sm text-gray-700">Male</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="sex"
-              value="female"
-              checked={sex === "female"}
-              onChange={(e) => onSexChange(e.target.value as "male" | "female")}
-              className="text-blue-600"
-            />
-            <span className="text-sm text-gray-700">Female</span>
-          </label>
-        </div>
-      </div>
 
-      <InputSlider
-        label="State Pension Contributing Years"
-        value={statePensionContributingYears}
-        onChange={onStatePensionContributingYearsChange}
-        min={0}
-        max={35}
-        formatter={(value) => {
-          const amount = calculateStatePensionAmount(value);
-          return `${value} years (${formatCurrency(amount)}/year)`;
-        }}
-        description="Need 10+ years for any pension, 35 years for full amount"
-      />
+        <InputSlider
+          label="State pension years"
+          value={statePensionContributingYears}
+          onChange={onStatePensionContributingYearsChange}
+          min={0}
+          max={35}
+          valueSuffix={`· ${formatCurrency(statePensionAmount)}/yr`}
+          description="10+ years for any state pension; 35 for the full amount."
+          minLabel="0 yrs"
+          maxLabel="35 yrs"
+        />
+      </div>
     </div>
   );
 };

@@ -1,7 +1,11 @@
 import { RangeSlider } from "./RangeSlider";
 import { InputSlider } from "./InputSlider";
-import { InfoButton } from "./InfoButton";
+import { SegmentedControl } from "./SegmentedControl";
+import { FineTuneGroup } from "./FineTuneGroup";
 import { CollapsibleSection } from "./CollapsibleSection";
+import { ASSET_PRESETS, matchAssetPreset } from "../presets";
+import { CURRENT_FULL_STATE_PENSION_ANNUAL } from "../state-pension";
+import { formatCurrency } from "../utils";
 
 interface MarketAssumptionsTabProps {
   returnRange: [number, number];
@@ -10,88 +14,96 @@ interface MarketAssumptionsTabProps {
   onVolatilityChange: (value: number) => void;
 }
 
-const ASSET_PRESETS = [
-  { name: "Cash", returnRange: [-0.5, 0.5] as [number, number], volatility: 0 },
-  { name: "Bonds", returnRange: [1.5, 2.5] as [number, number], volatility: 5 },
-  { name: "60/40", returnRange: [3, 4] as [number, number], volatility: 11 },
-  { name: "Equity", returnRange: [4, 6] as [number, number], volatility: 17 },
-];
-
 export const MarketAssumptionsTab = ({
   returnRange,
   volatility,
   onReturnRangeChange,
   onVolatilityChange,
 }: MarketAssumptionsTabProps) => {
-  const applyPreset = (preset: (typeof ASSET_PRESETS)[0]) => {
+  const activePreset = matchAssetPreset(returnRange, volatility);
+
+  const applyPreset = (name: string) => {
+    const preset = ASSET_PRESETS.find((p) => p.name === name);
+    if (!preset) return;
     onReturnRangeChange(preset.returnRange);
     onVolatilityChange(preset.volatility);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <h3 className="text-base font-semibold text-gray-800">
-          Market Assumptions
-        </h3>
-        <InfoButton content="Nobody can predict the future, but we need to make assumptions about average market performance and volatility for the simulation." />
-      </div>
+    <div>
+      <h2 className="text-[19px] font-bold text-ink mb-[4px]">
+        How your money's invested
+      </h2>
+      <p className="text-[13.5px] leading-[1.5] text-muted mb-[26px]">
+        Pick an approach — it sets the growth and volatility below. Nudge either
+        slider to fine-tune.
+      </p>
 
-      <div>
-        <p className="text-xs text-gray-600 mb-2">Asset Allocation Presets:</p>
-        <div className="flex gap-2 flex-wrap">
-          {ASSET_PRESETS.map((preset) => (
-            <button
-              key={preset.name}
-              onClick={() => applyPreset(preset)}
-              className="px-3 py-1.5 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 rounded border border-blue-200 transition-colors"
-            >
-              {preset.name}
-            </button>
-          ))}
-        </div>
+      <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-muted mb-[11px]">
+        Approach presets
       </div>
-
-      <RangeSlider
-        label="Expected Annual Return Range"
-        value={returnRange}
-        onChange={onReturnRangeChange}
-        min={-2}
-        max={15}
-        step={0.5}
-        formatter={(value) => `${value}%`}
+      <SegmentedControl
+        fullWidth
+        value={activePreset?.name ?? null}
+        onChange={applyPreset}
+        options={ASSET_PRESETS.map((preset) => ({
+          value: preset.name,
+          label: preset.name,
+        }))}
       />
 
-      <InputSlider
-        label="Market Volatility (Standard Deviation)"
-        value={volatility}
-        onChange={onVolatilityChange}
-        min={0}
-        max={30}
-        step={1}
-        formatter={(value) => `${value}%`}
-      />
+      <FineTuneGroup
+        caption={
+          activePreset ? (
+            <>
+              Set by <span className="text-ink">{activePreset.name}</span>
+            </>
+          ) : (
+            "Custom"
+          )
+        }
+      >
+        <RangeSlider
+          className="mb-[28px]"
+          label="Expected growth each year"
+          value={returnRange}
+          onChange={onReturnRangeChange}
+          min={-2}
+          max={15}
+          step={0.5}
+          valueLabel={`${returnRange[0]} – ${returnRange[1]}%`}
+          minLabel="After inflation & fees"
+          maxLabel="Higher = more growth & risk"
+        />
 
-      <CollapsibleSection title="About These Assumptions">
-        <div className="text-xs text-gray-700 space-y-1">
-          <p className="font-medium">
-            Returns and volatility are real (after-inflation) figures.
-          </p>
-          <p>
-            <span className="font-medium">Return range:</span> Models
-            uncertainty about the long-term average return. Each simulation
-            samples a different average return from this range.
-          </p>
-          <p>
-            <span className="font-medium">Volatility:</span> Models year-to-year
-            variation around the average return in each simulation.
-          </p>
-          <p>
-            These presets are based on long-term historical data from developed
-            markets. Actual results will vary, and past performance doesn't
-            guarantee future returns.
-          </p>
-        </div>
+        <InputSlider
+          label="Volatility"
+          labelSuffix="· std. dev. of returns"
+          value={volatility}
+          onChange={onVolatilityChange}
+          min={0}
+          max={30}
+          formatter={(value) => `${value}%`}
+        />
+      </FineTuneGroup>
+
+      <CollapsibleSection title="How we model these futures" topRule>
+        <p>
+          We run 10,000 Monte Carlo simulations. Each draws a different average
+          return from your growth range and varies it year to year by the
+          volatility.
+        </p>
+        <p>
+          Growth and volatility are real figures — after inflation and fees.
+          Mortality is modelled from UK life tables, so "running out" means
+          outliving your money rather than reaching a fixed age.
+        </p>
+        <p>
+          The full UK state pension is currently{" "}
+          {formatCurrency(CURRENT_FULL_STATE_PENSION_ANNUAL)}/year. Past
+          performance doesn't guarantee future results — this isn't financial
+          advice.
+        </p>
       </CollapsibleSection>
     </div>
   );

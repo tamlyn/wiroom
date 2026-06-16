@@ -6,36 +6,42 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  ReferenceLine,
+  ReferenceDot,
   ResponsiveContainer,
 } from "recharts";
 import { formatCurrency } from "../utils";
-import { CollapsibleSection } from "./CollapsibleSection";
+import { colors } from "../theme";
 import type { PercentileDataPoint } from "../monte-carlo.ts";
 
 interface PensionChartProps {
   percentileData: PercentileDataPoint[];
+  retirementAge: number;
 }
 
-export const PensionChart = ({ percentileData }: PensionChartProps) => {
+const formatAxis = (value: number) =>
+  value >= 1_000_000
+    ? `£${(value / 1_000_000).toFixed(1)}m`
+    : `£${Math.round(value / 1000)}k`;
+
+export const PensionChart = ({
+  percentileData,
+  retirementAge,
+}: PensionChartProps) => {
   const max75th = Math.max(...percentileData.map((d) => d.p75 || 0));
   const yAxisMax = max75th * 1.1;
 
-  // Transform data to create stackable bands
+  // Stack invisible p5 baseline + band heights so the fan reads as three bands.
+  // Clamp the top band to the axis so optimistic tails don't flatten the rest.
   const clampedData = percentileData.map((point) => {
-    const clampedP95 = point.p95
-      ? point.p95 < yAxisMax
-        ? point.p95
-        : yAxisMax
-      : 0;
+    const clampedP95 = point.p95 ? Math.min(point.p95, yAxisMax) : 0;
     return {
       age: point.age,
       p5: point.p5,
-      band5to25: point.p25 - point.p5, // height of 5-25 band
-      band25to75: point.p75 - point.p25, // height of 25-75 band
-      band75to95: clampedP95 - point.p75, // height of 75-95 band
-      p50: point.p50 > 0 ? point.p50 : null, // for the median line - null stops the line
-      // Keep originals for tooltip
+      band5to25: point.p25 - point.p5,
+      band25to75: point.p75 - point.p25,
+      band75to95: Math.max(clampedP95 - point.p75, 0),
+      p50: point.p50 > 0 ? point.p50 : null,
       originalP5: point.p5,
       originalP25: point.p25,
       originalP50: point.p50,
@@ -44,150 +50,128 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
     };
   });
 
+  const retirementPoint = percentileData.find((p) => p.age === retirementAge);
+  const retirementMedian = retirementPoint?.p50 ?? 0;
+
   return (
-    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h2 className="text-base font-semibold text-gray-800 mb-3">
-        Projected Pot Value Over Time
-      </h2>
-      <ResponsiveContainer width="100%" height={320}>
-        <AreaChart data={clampedData} stackOffset="none">
-          <defs>
-            <linearGradient id="colorMiddle" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
-            </linearGradient>
-            <linearGradient id="colorOuter" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#93c5fd" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#93c5fd" stopOpacity={0.2} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis
-            dataKey="age"
-            label={{ value: "Age", position: "insideBottom", offset: -5 }}
-            tick={{ fontSize: 12 }}
-            interval={2}
-          />
-          <YAxis
-            tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
-            label={{ value: "Pot Value", angle: -90, position: "insideLeft" }}
-            tick={{ fontSize: 12 }}
-            domain={[0, yAxisMax]}
-          />
-          <Tooltip
-            content={({ active, payload, label }) => {
-              if (active && payload && payload.length) {
-                const dataPoint = clampedData.find((p) => p.age === label);
+    <ResponsiveContainer width="100%" height={300}>
+      <AreaChart
+        data={clampedData}
+        margin={{ top: 12, right: 8, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid vertical={false} stroke={colors.grid} />
+        <XAxis
+          dataKey="age"
+          tick={{ fontSize: 12, fill: colors.muted }}
+          tickLine={false}
+          axisLine={{ stroke: colors.line }}
+          interval={9}
+        />
+        <YAxis
+          tickFormatter={formatAxis}
+          tick={{ fontSize: 12, fill: colors.muted }}
+          tickLine={false}
+          axisLine={false}
+          domain={[0, yAxisMax]}
+          width={52}
+        />
+        <Tooltip
+          content={({ active, payload, label }) => {
+            if (!active || !payload || !payload.length) return null;
+            const d = clampedData.find((p) => p.age === label);
+            if (!d) return null;
+            return (
+              <div
+                className="bg-card border border-line-strong px-[14px] py-[11px] text-[12px]"
+                style={{ boxShadow: "0 4px 14px rgba(21,24,30,0.10)" }}
+              >
+                <div className="font-bold text-ink mb-[6px]">Age {label}</div>
+                <div className="font-bold text-accent mb-[4px]">
+                  Median {formatCurrency(d.originalP50 || 0)}
+                </div>
+                <div className="text-inksoft">
+                  50% range {formatCurrency(d.originalP25 || 0)} –{" "}
+                  {formatCurrency(d.originalP75 || 0)}
+                </div>
+                <div className="text-muted">
+                  90% range {formatCurrency(d.originalP5 || 0)} –{" "}
+                  {formatCurrency(d.originalP95 || 0)}
+                </div>
+              </div>
+            );
+          }}
+        />
 
-                return (
-                  <div className="bg-white p-2 border border-gray-200 rounded shadow-lg text-xs">
-                    <p className="font-semibold mb-1">Age: {label}</p>
-                    <p className="text-green-600">
-                      95th: {formatCurrency(dataPoint?.originalP95 || 0)}
-                    </p>
-                    <p className="text-blue-600">
-                      75th: {formatCurrency(dataPoint?.originalP75 || 0)}
-                    </p>
-                    <p className="font-bold text-blue-800">
-                      Median: {formatCurrency(dataPoint?.originalP50 || 0)}
-                    </p>
-                    <p className="text-orange-600">
-                      25th: {formatCurrency(dataPoint?.originalP25 || 0)}
-                    </p>
-                    <p className="text-red-600">
-                      5th: {formatCurrency(dataPoint?.originalP5 || 0)}
-                    </p>
-                  </div>
-                );
-              }
-              return null;
-            }}
-          />
-          <Legend wrapperStyle={{ fontSize: "11px" }} />
+        <Area
+          type="monotone"
+          dataKey="p5"
+          stackId="1"
+          stroke="none"
+          fill="transparent"
+        />
+        <Area
+          type="monotone"
+          dataKey="band5to25"
+          stackId="1"
+          stroke="none"
+          fill={colors.bandSoft}
+        />
+        <Area
+          type="monotone"
+          dataKey="band25to75"
+          stackId="1"
+          stroke="none"
+          fill={colors.bandStrong}
+        />
+        <Area
+          type="monotone"
+          dataKey="band75to95"
+          stackId="1"
+          stroke="none"
+          fill={colors.bandSoft}
+        />
 
-          {/* Base area - 5th percentile (invisible, just sets the baseline) */}
-          <Area
-            type="monotone"
-            dataKey="p5"
-            stackId="1"
-            stroke="none"
-            fill="transparent"
-            legendType="none"
-          />
+        <Line
+          type="monotone"
+          dataKey="p50"
+          stroke={colors.accent}
+          strokeWidth={3}
+          strokeLinecap="round"
+          dot={false}
+        />
 
-          {/* 5th-25th percentile band - light shade */}
-          <Area
-            type="monotone"
-            dataKey="band5to25"
-            stackId="1"
-            stroke="none"
-            fill="url(#colorOuter)"
-            name="5th-25th percentile"
-            legendType="rect"
+        <ReferenceLine
+          x={retirementAge}
+          stroke={colors.muted}
+          strokeDasharray="4 4"
+          label={{
+            value: "RETIRE",
+            position: "insideTopLeft",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.09em",
+            fill: colors.muted,
+          }}
+        />
+        {retirementMedian > 0 && (
+          <ReferenceDot
+            x={retirementAge}
+            y={Math.min(retirementMedian, yAxisMax)}
+            r={0}
+            shape={({ cx, cy }: { cx?: number; cy?: number }) => (
+              <rect
+                x={(cx ?? 0) - 4.5}
+                y={(cy ?? 0) - 4.5}
+                width={9}
+                height={9}
+                fill="#fff"
+                stroke={colors.accent}
+                strokeWidth={2.5}
+              />
+            )}
           />
-
-          {/* 25th-75th percentile band - darker shade */}
-          <Area
-            type="monotone"
-            dataKey="band25to75"
-            stackId="1"
-            stroke="none"
-            fill="url(#colorMiddle)"
-            name="25th-75th percentile"
-            legendType="rect"
-          />
-
-          {/* 75th-95th percentile band - light shade */}
-          <Area
-            type="monotone"
-            dataKey="band75to95"
-            stackId="1"
-            stroke="none"
-            fill="url(#colorOuter)"
-            name="75th-95th percentile"
-            legendType="rect"
-          />
-
-          {/* Median line */}
-          <Line
-            type="monotone"
-            dataKey="p50"
-            stroke="#1e40af"
-            strokeWidth={2.5}
-            name="Median"
-            dot={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-
-      <CollapsibleSection title="How to read this chart" className="mt-3">
-        <div className="text-xs text-gray-600 space-y-1">
-          <p>
-            • The{" "}
-            <span className="font-bold text-blue-800">thick blue line</span>{" "}
-            shows the median (expected) outcome
-          </p>
-          <p>
-            • The{" "}
-            <span className="font-semibold text-blue-600">
-              darker shaded area
-            </span>{" "}
-            shows the middle 50% of outcomes (25th-75th percentiles)
-          </p>
-          <p>
-            • The{" "}
-            <span className="font-semibold text-blue-300">
-              lighter shaded areas
-            </span>{" "}
-            above and below show the outer ranges (5th-25th and 75th-95th
-            percentiles)
-          </p>
-          <p>• Together, the shaded areas cover 90% of all possible outcomes</p>
-          <p>
-            • Wider shaded areas indicate more uncertainty about future values
-          </p>
-        </div>
-      </CollapsibleSection>
-    </div>
+        )}
+      </AreaChart>
+    </ResponsiveContainer>
   );
 };

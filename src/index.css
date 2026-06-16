@@ -1,0 +1,54 @@
+@import "rc-slider/assets/index.css";
+
+body {
+  margin: 0;
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  background: #ecedef;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Editorial slider: thin squared rail, blue fill, round white handle.
+   Shared by single (InputSlider) and range (RangeSlider) controls so they
+   read as one family. */
+.wiroom-slider.rc-slider {
+  height: 16px;
+  padding: 0;
+  border-radius: 0;
+}
+
+.wiroom-slider .rc-slider-rail,
+.wiroom-slider .rc-slider-track {
+  height: 3px;
+  border-radius: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.wiroom-slider .rc-slider-rail {
+  background-color: rgba(21, 24, 30, 0.12);
+}
+
+.wiroom-slider .rc-slider-track {
+  background-color: #1f4e87;
+}
+
+.wiroom-slider .rc-slider-handle {
+  width: 15px;
+  height: 15px;
+  top: 50%;
+  margin-top: -7.5px;
+  background-color: #fff;
+  border: 2.5px solid #1f4e87;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: none;
+}
+
+.wiroom-slider .rc-slider-handle:hover,
+.wiroom-slider .rc-slider-handle:active,
+.wiroom-slider .rc-slider-handle:focus-visible,
+.wiroom-slider
+  .rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging {
+  border-color: #1f4e87;
+  box-shadow: 0 0 0 4px rgba(31, 78, 135, 0.15);
+}

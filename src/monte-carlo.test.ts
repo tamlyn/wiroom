@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   runMonteCarloSimulation,
   calculateMortalityAdjustedPercentiles,
+  calculateRunOutChance,
   type SimulationDataPoint,
 } from "./monte-carlo";
-import { calculateRunOutChance } from "./components/ProjectedOutcomes";
 
 // Build one simulation: ages startAge..startAge+potValues.length-1, one point
 // per year, all sharing the same deathAge. retirementAge defaults to startAge,

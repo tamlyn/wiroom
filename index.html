@@ -3,8 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pension Calculator</title>
+    <title>WIROOM · Will I run out of money?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#15181E",
+              inksoft: "#545C68",
+              muted: "#969DA8",
+              line: "rgba(21,24,30,0.12)",
+              "line-strong": "rgba(21,24,30,0.18)",
+              card: "#FCFCFB",
+              canvas: "#ECEDEF",
+              accent: "#1F4E87",
+              amber: "#9A6B1E",
+              forest: "#2C7A57",
+            },
+            fontFamily: {
+              sans: ["Schibsted Grotesk", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

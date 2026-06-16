@@ -5,12 +5,11 @@ import {
 } from "./monte-carlo";
 import { TabType } from "./types";
 import { calculateStatePensionAmount } from "./state-pension";
+import { DEFAULT_ASSET_PRESET, DEFAULT_LIVING_STANDARD } from "./presets";
 import {
   CurrentSituationTab,
-  ImportantNotes,
   MarketAssumptionsTab,
-  PensionChart,
-  ProjectedOutcomes,
+  ProjectionPanel,
   TabNavigation,
   YourDecisionsTab,
 } from "./components";
@@ -19,14 +18,18 @@ const PensionCalculator = () => {
   const [currentAge, setCurrentAge] = useState(45);
   const [currentPot, setCurrentPot] = useState(250000);
   const [annualContribution, setAnnualContribution] = useState(10000);
-  const [returnRange, setReturnRange] = useState<[number, number]>([4, 5]);
-  const [volatility, setVolatility] = useState(15);
+  const [returnRange, setReturnRange] = useState<[number, number]>(
+    DEFAULT_ASSET_PRESET.returnRange,
+  );
+  const [volatility, setVolatility] = useState(DEFAULT_ASSET_PRESET.volatility);
   const [retirementAge, setRetirementAge] = useState(65);
-  const [annualDrawdown, setAnnualDrawdown] = useState(45000);
+  const [annualDrawdown, setAnnualDrawdown] = useState(
+    DEFAULT_LIVING_STANDARD.single,
+  );
   const [sex, setSex] = useState<"male" | "female">("male");
   const [statePensionContributingYears, setStatePensionContributingYears] =
     useState(35);
-  const [activeTab, setActiveTab] = useState<TabType>("decisions");
+  const [activeTab, setActiveTab] = useState<TabType>("current");
 
   const statePensionAmount = calculateStatePensionAmount(
     statePensionContributingYears,
@@ -112,33 +115,51 @@ const PensionCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Pension Calculator
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Model your retirement outlook with Monte Carlo simulation.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Left Column - Inputs & reference */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-              <div className="p-5">{renderTabContent()}</div>
+    <div className="min-h-screen bg-canvas font-sans text-ink px-4 py-8 sm:px-8 lg:px-[56px] lg:py-[60px]">
+      <div
+        className="max-w-[1280px] mx-auto bg-card border border-line-strong"
+        style={{ boxShadow: "0 1px 2px rgba(21,24,30,0.04)" }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-[40px] py-[20px] border-b border-line">
+          <div className="flex items-center gap-[13px]">
+            <div className="w-[34px] h-[34px] bg-ink flex items-center justify-center shrink-0">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6"
+                  stroke="#fff"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
+            <div>
+              <div className="text-[18px] font-extrabold tracking-[0.02em]">
+                WIROOM
+              </div>
+              <div className="text-[12px] text-muted -mt-px">
+                Will I run out of money?
+              </div>
+            </div>
+          </div>
+          <span className="text-[12.5px] text-muted">
+            Figures in today's money
+          </span>
+        </div>
 
-            <ImportantNotes />
+        {/* Body: inputs (left) + persistent outlook (right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[500px_1fr]">
+          <div className="border-b lg:border-b-0 lg:border-r border-line">
+            <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+            <div className="px-[40px] py-[34px]">{renderTabContent()}</div>
           </div>
 
-          {/* Right Column - Results */}
-          <div className="space-y-6">
-            <PensionChart percentileData={percentileData} />
-            <ProjectedOutcomes simulations={simulations} />
-          </div>
+          <ProjectionPanel
+            simulations={simulations}
+            percentileData={percentileData}
+            currentAge={currentAge}
+            retirementAge={retirementAge}
+          />
         </div>
       </div>
     </div>

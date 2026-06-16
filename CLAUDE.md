@@ -43,22 +43,48 @@ uncertainty:
 - `calculateMortalityAdjustedPercentiles()` - Converts simulation results into
   5th, 25th, 50th, 75th, 95th percentiles (note: it does not currently weight by
   mortality despite the name)
+- `calculateRunOutChance()` - The headline figure: % of simulations where the
+  pot hits £0 during drawdown before death
+
+### Design system (WIROOM redesign)
+
+The UI is the "WIROOM" (Will I Run Out Of Money) editorial redesign: single
+typeface (Schibsted Grotesk, loaded in `index.html`), squared corners, hairline
+rules instead of shadowed cards, restrained ink + one-blue palette.
+
+- Colour/font tokens are configured as Tailwind utilities (`ink`, `muted`,
+  `accent`, `amber`, `card`, `line`, `font-sans`…) via the inline
+  `tailwind.config` in `index.html`. The same raw values live in `src/theme.ts`
+  for JS contexts (Recharts fills); `src/index.css` holds the rc-slider
+  overrides (`.wiroom-slider`).
+- Styling is Tailwind utility classes (often arbitrary px values to match the
+  mock). The Tailwind **Play CDN** is loaded in `index.html` — the `tailwindcss`
+  devDependency is not wired into the build.
 
 ### UI Architecture
 
-**Main Component**: `src/pension-calculator.tsx` - Root component with
-two-column layout (controls + chart)
+**Main Component**: `src/pension-calculator.tsx` - Single card with a header bar
+(WIROOM branding) and a two-column body: tabbed inputs on the left (500px),
+persistent `ProjectionPanel` on the right. Stacks on narrow screens.
 
-**Tab-Based Input System**:
+**Tab-Based Input System** (labels: Situation / Markets / Decisions):
 
-- `CurrentSituationTab.tsx` - Age, current pot, sex, state-pension contributing
-  years
-- `MarketAssumptionsTab.tsx` - Expected returns and volatility
-- `YourDecisionsTab.tsx` - Annual contribution, retirement age, annual drawdown
+- `CurrentSituationTab.tsx` - Age, current pot, sex (segmented), state-pension
+  contributing years
+- `MarketAssumptionsTab.tsx` - Approach presets that drive growth range +
+  volatility via a `FineTuneGroup` bracket ("Set by 60 / 40" → "Custom")
+- `YourDecisionsTab.tsx` - Annual contribution, retirement age, drawdown (driven
+  by UK living-standard presets via the same bracket pattern)
 
-**Visualization**: `src/components/PensionChart.tsx`
+**Outlook**: `src/components/ProjectionPanel.tsx` - The persistent right panel.
+Leads with the run-out probability hero (amber) + a 75/25 "last a lifetime" bar,
+then the chart and a relabelled legend (Median path / 50% / 90% range).
 
-- Uses a Recharts AreaChart with stacked percentile bands plus a median line
+**Visualization**: `src/components/PensionChart.tsx` - Chart-only (no card
+chrome); embedded in `ProjectionPanel`.
+
+- Recharts AreaChart with stacked percentile bands plus a median line, a dashed
+  `RETIRE` marker, and a square at the median on the retirement age
 - **Important**: Implements data clamping to prevent 95th percentile from making
   other lines flat
 - Charts scale to 110% of 75th percentile max, cropping extreme optimistic
@@ -67,11 +93,16 @@ two-column layout (controls + chart)
 
 **Reusable Components**:
 
-- `InputSlider.tsx` - Standardized slider with value display
-- `CollapsibleSection.tsx` - Expandable content areas to save space
-- `InfoButton.tsx` - Tooltip component for contextual help
-- `ProjectedOutcomes.tsx` - "Retirement Risk" card: the chance of running out of
-  money before death
+- `InputSlider.tsx` / `RangeSlider.tsx` - Editorial sliders on rc-slider, styled
+  by the `.wiroom-slider` class
+- `SegmentedControl.tsx` - Squared segmented control (sex, approach presets)
+- `FineTuneGroup.tsx` - The "preset governs the slider(s) below" bracket
+- `CollapsibleSection.tsx` - "How we model these futures" expander
+
+**Presets**: `src/presets.ts` - `ASSET_PRESETS` (Cash/Bonds/60-40/Equity) and
+`LIVING_STANDARDS` (Minimum/Moderate/Comfortable), plus `match*` helpers used to
+decide whether a control shows "Set by <preset>" or "Custom". The app's default
+return/volatility/drawdown are sourced from these so a preset is active on load.
 
 ### Data Flow
 
@@ -98,7 +129,7 @@ reach extreme values, making median/quartile lines appear flat. PensionChart.tsx
 solves this by:
 
 - Setting yAxisMax to 110% of the 75th percentile maximum
-- Clamping p95 data points above this threshold to `undefined`
+- Clamping the 75th-95th band so it never extends past yAxisMax
 - Preserving original unclamped values in custom tooltip
 
 **Test Coverage**: `src/pension-calculator.test.ts` contains 36 tests across 7

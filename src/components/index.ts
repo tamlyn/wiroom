@@ -1,10 +1,11 @@
 export { InputSlider } from "./InputSlider";
+export { RangeSlider } from "./RangeSlider";
+export { SegmentedControl } from "./SegmentedControl";
+export { FineTuneGroup } from "./FineTuneGroup";
 export { TabNavigation } from "./TabNavigation";
 export { CurrentSituationTab } from "./CurrentSituationTab";
 export { MarketAssumptionsTab } from "./MarketAssumptionsTab";
 export { YourDecisionsTab } from "./YourDecisionsTab";
-export { ProjectedOutcomes } from "./ProjectedOutcomes";
+export { ProjectionPanel } from "./ProjectionPanel";
 export { PensionChart } from "./PensionChart";
-export { ImportantNotes } from "./ImportantNotes";
 export { CollapsibleSection } from "./CollapsibleSection";
-export { InfoButton } from "./InfoButton";
