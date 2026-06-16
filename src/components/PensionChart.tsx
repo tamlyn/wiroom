@@ -45,8 +45,8 @@ export const PensionChart = ({ percentileData }: PensionChartProps) => {
   });
 
   return (
-    <div className="bg-white p-3 rounded-md shadow">
-      <h2 className="text-base font-semibold text-gray-800 mb-2">
+    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+      <h2 className="text-base font-semibold text-gray-800 mb-3">
         Projected Pot Value Over Time
       </h2>
       <ResponsiveContainer width="100%" height={320}>

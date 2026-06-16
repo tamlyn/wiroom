@@ -112,28 +112,33 @@ const PensionCalculator = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-        Pension Calculator
-      </h1>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-8 px-4">
+      <div className="max-w-7xl mx-auto p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Pension Calculator
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Model your retirement outlook with Monte Carlo simulation.
+          </p>
+        </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Left Column - Controls */}
-        <div className="space-y-4">
-          <div>
-            <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-            <div className="bg-gray-50 p-4 rounded-lg">
-              {renderTabContent()}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Left Column - Inputs & reference */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+              <div className="p-5">{renderTabContent()}</div>
             </div>
+
+            <ImportantNotes />
           </div>
 
-          <ProjectedOutcomes simulations={simulations} />
-        </div>
-
-        {/* Right Column - Chart */}
-        <div className="space-y-4">
-          <PensionChart percentileData={percentileData} />
-          <ImportantNotes />
+          {/* Right Column - Results */}
+          <div className="space-y-6">
+            <PensionChart percentileData={percentileData} />
+            <ProjectedOutcomes simulations={simulations} />
+          </div>
         </div>
       </div>
     </div>

@@ -34,23 +34,25 @@ export const ProjectedOutcomes = ({ simulations }: ProjectedOutcomesProps) => {
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md">
+    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
       <h2 className="text-base font-semibold text-gray-800 mb-3">
         Retirement Risk
       </h2>
 
       <div
-        className={`p-4 rounded-lg border-2 ${getColorClass(runOutPercentage)}`}
+        className={`flex items-center gap-4 p-5 rounded-lg border ${getColorClass(
+          runOutPercentage,
+        )}`}
       >
-        <div className="text-center">
-          <div className="text-3xl font-bold mb-1">{runOutPercentage}%</div>
-          <div className="text-sm font-medium">
-            Chance of running out of money before death
-          </div>
+        <div className="text-5xl font-bold leading-none">
+          {runOutPercentage}%
+        </div>
+        <div className="text-sm font-medium">
+          Chance of running out of money before death
         </div>
       </div>
 
-      <div className="text-xs text-gray-500 mt-3 text-center">
+      <div className="text-xs text-gray-500 mt-3">
         Based on {simulations.length.toLocaleString()} Monte Carlo simulations
         with mortality modeling
       </div>
