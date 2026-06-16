@@ -20,8 +20,8 @@ model investment uncertainty and provides percentile-based projections.
 
 ### Core Mathematical Components
 
-**`src/pension-calculations.ts`** - Contains the deterministic pension
-projection logic:
+**`src/pension-calculations.ts`** - Projects a single pension trajectory over
+time:
 
 - `calculatePensionProjection()` - Core function that projects pension pot value
   over time
@@ -30,16 +30,19 @@ projection logic:
 - Accumulation: `pot = pot * (1 + growthRate) + annualContribution`
 - Drawdown: `pot = pot * (1 + growthRate) - annualDrawdown + statePension`
 - State pension income added at eligibility age (calculated from birth year)
-- Stops simulation when pot depletes during drawdown phase
+- Continues to `maxAge` even after the pot hits £0 (it does not stop early), to
+  avoid survival bias
 
 **`src/monte-carlo.ts`** - Monte Carlo simulation for modeling market
 uncertainty:
 
-- `runMonteCarloSimulation()` - Runs 1000+ simulations with random returns
-- `pickFromNormalDistribution()` - Creates normally distributed returns based on
-  expected return ± volatility
-- `calculatePercentiles()` - Converts simulation results into 5th, 25th, 50th,
-  75th, 95th percentiles
+- `runMonteCarloSimulation()` - Runs many simulations (default 1000; the UI uses
+  10,000) with random returns
+- `pickFromNormalDistribution()` (defined in `src/utils.ts`) - Creates normally
+  distributed returns based on expected return ± volatility
+- `calculateMortalityAdjustedPercentiles()` - Converts simulation results into
+  5th, 25th, 50th, 75th, 95th percentiles (note: it does not currently weight by
+  mortality despite the name)
 
 ### UI Architecture
 
@@ -48,32 +51,34 @@ two-column layout (controls + chart)
 
 **Tab-Based Input System**:
 
-- `CurrentSituationTab.tsx` - Age, current pot, contributions
+- `CurrentSituationTab.tsx` - Age, current pot, sex, state-pension contributing
+  years
 - `MarketAssumptionsTab.tsx` - Expected returns and volatility
-- `YourDecisionsTab.tsx` - Retirement age, drawdown amount, and state pension
+- `YourDecisionsTab.tsx` - Annual contribution, retirement age, annual drawdown
 
 **Visualization**: `src/components/PensionChart.tsx`
 
-- Uses Recharts LineChart to display percentile projections
+- Uses a Recharts AreaChart with stacked percentile bands plus a median line
 - **Important**: Implements data clamping to prevent 95th percentile from making
   other lines flat
 - Charts scale to 110% of 75th percentile max, cropping extreme optimistic
   scenarios
-- Custom tooltip shows unclamped values with "(cropped)" indicator
+- Custom tooltip shows the unclamped percentile values
 
 **Reusable Components**:
 
 - `InputSlider.tsx` - Standardized slider with value display
 - `CollapsibleSection.tsx` - Expandable content areas to save space
 - `InfoButton.tsx` - Tooltip component for contextual help
-- `ProjectedOutcomes.tsx` - Compact summary of key metrics
+- `ProjectedOutcomes.tsx` - "Retirement Risk" card: the chance of running out of
+  money before death
 
 ### Data Flow
 
-1. User inputs → `PensionParams` interface in `types.ts`
-2. Deterministic calculation via `calculatePensionProjection()`
+1. User inputs → component state (`useState` in `pension-calculator.tsx`)
+2. Per-simulation projection via `calculatePensionProjection()`
 3. Monte Carlo simulation via `runMonteCarloSimulation()`
-4. Percentile calculation via `calculatePercentiles()`
+4. Percentile calculation via `calculateMortalityAdjustedPercentiles()`
 5. Chart visualization with data clamping in `PensionChart`
 
 ### Key Implementation Details
@@ -110,8 +115,9 @@ year after. This is the expected behavior tested throughout the test suite.
 
 ## TypeScript Interfaces
 
-Key types in `src/types.ts`:
+Key types (`src/types.ts` contains only `TabType`; the others live with their
+modules):
 
-- `PensionParams` - All user input parameters (includes `statePensionAmount`)
-- `PercentileDataPoint` - Chart data with p5, p25, p50, p75, p95 values
-- `SurvivalRate` - Actuarial data for life expectancy calculations
+- `TabType` - The active input tab ("current" | "uncertainty" | "decisions")
+- `PercentileDataPoint` - defined in `src/monte-carlo.ts`; chart data with
+  dynamic `p{n}` keys
