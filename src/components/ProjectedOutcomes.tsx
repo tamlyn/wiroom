@@ -4,7 +4,7 @@ interface ProjectedOutcomesProps {
   simulations: SimulationDataPoint[][];
 }
 
-const calculateRunOutChance = (
+export const calculateRunOutChance = (
   simulations: SimulationDataPoint[][],
 ): number => {
   if (!simulations.length) return 0;
