@@ -38,7 +38,7 @@ export const LIVING_STANDARDS: LivingStandard[] = [
   { name: "Comfortable", single: 43900 },
 ];
 
-export const DEFAULT_LIVING_STANDARD = LIVING_STANDARDS[2];
+export const DEFAULT_LIVING_STANDARD = LIVING_STANDARDS[1]; // Moderate
 
 export const matchLivingStandard = (
   annualDrawdown: number,

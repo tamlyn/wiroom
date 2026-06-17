@@ -8,6 +8,7 @@ import { calculateStatePensionAmount } from "./state-pension";
 import { DEFAULT_ASSET_PRESET, DEFAULT_LIVING_STANDARD } from "./presets";
 import {
   CurrentSituationTab,
+  InfoPopup,
   MarketAssumptionsTab,
   ProjectionPanel,
   TabNavigation,
@@ -121,30 +122,16 @@ const PensionCalculator = () => {
         style={{ boxShadow: "0 1px 2px rgba(21,24,30,0.04)" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-[40px] py-[20px] border-b border-line">
-          <div className="flex items-center gap-[13px]">
-            <div className="w-[34px] h-[34px] bg-ink flex items-center justify-center shrink-0">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6"
-                  stroke="#fff"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <div>
-              <div className="text-[18px] font-extrabold tracking-[0.02em]">
-                WIROOM
-              </div>
-              <div className="text-[12px] text-muted -mt-px">
-                Will I run out of money?
-              </div>
-            </div>
+        <div className="relative z-20 flex items-center justify-between px-[40px] py-[20px] border-b border-line">
+          <div className="text-[22px] font-bold tracking-[-0.01em] text-ink">
+            Will I run out of money?
           </div>
-          <span className="text-[12.5px] text-muted">
-            Figures in today's money
-          </span>
+          <InfoPopup label="All figures in today's money">
+            We model growth in <strong>real</strong> terms — i.e. after
+            inflation — so every figure already sits in today's money. That lets
+            you weigh amounts against what things cost now, rather than guess at
+            future prices.
+          </InfoPopup>
         </div>
 
         {/* Body: inputs (left) + persistent outlook (right) */}

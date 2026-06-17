@@ -9,3 +9,4 @@ export { YourDecisionsTab } from "./YourDecisionsTab";
 export { ProjectionPanel } from "./ProjectionPanel";
 export { PensionChart } from "./PensionChart";
 export { CollapsibleSection } from "./CollapsibleSection";
+export { InfoPopup } from "./InfoPopup";

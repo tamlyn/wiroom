@@ -12,6 +12,7 @@ export const colors = {
   accent: "#1F4E87",
   amber: "#9A6B1E",
   forest: "#2C7A57",
+  danger: "#A3322B",
   // Fan-chart bands, tinted from the accent blue.
   bandStrong: "rgba(31,78,135,0.20)",
   bandSoft: "rgba(31,78,135,0.075)",
